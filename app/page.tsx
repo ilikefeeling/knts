@@ -68,6 +68,28 @@ export default function Home() {
 
       {/* ── 엑셀 업로드 ── */}
       <ExcelUploader onComplete={loadVisits} />
+      <a
+        href="/templates/visit-list-template.xlsx"
+        download="방문명단_샘플양식.xlsx"
+        className="btn btn-ghost"
+        style={{
+          justifyContent: "center",
+          border: "1px solid var(--color-border)",
+          marginTop: "-4px",
+        }}
+      >
+        📥 방문명단 샘플 엑셀 양식 다운로드
+      </a>
+      <p
+        style={{
+          fontSize: 13,
+          color: "var(--color-text-muted)",
+          margin: "4px 0 0",
+        }}
+      >
+        명단 양식이 따로 없으신가요? 샘플 양식을 받아 1행은 그대로 두고
+        2행부터 채워서 업로드하면 됩니다.
+      </p>
 
       {/* ── 바로가기 ── */}
       <div className="home-links">
