@@ -1,4 +1,4 @@
-const CACHE_NAME = "knts-v1";
+const CACHE_NAME = "knts-v2";
 const OFFLINE_URLS = ["/"];
 
 self.addEventListener("install", (event) => {
@@ -24,15 +24,17 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (!event.request.url.startsWith("http")) return;
+  if (event.request.url.includes("/_next/webpack-hmr")) return;
 
   event.respondWith(
-    fetch(event.request).catch(async () => {
-      const cached = await caches.match(event.request);
-      if (cached) return cached;
-      return new Response("Network Error", {
-        status: 503,
-        statusText: "Service Unavailable",
-        headers: new Headers({ "Content-Type": "text/plain" }),
+    fetch(event.request).catch(() => {
+      return caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return new Response("Network Error", {
+          status: 503,
+          statusText: "Service Unavailable",
+          headers: new Headers({ "Content-Type": "text/plain" }),
+        });
       });
     })
   );
