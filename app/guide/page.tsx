@@ -83,34 +83,49 @@ export default function GuidePage() {
         <Step num={1}>
           <p>
             <strong>[출발 전] 명단 준비하기</strong><br />
-            사무실에서 엑셀로 오늘 방문할 명단을 업로드합니다. <a href="#section-2" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+            사무실에서 엑셀로 오늘 방문할 명단을 업로드합니다.
           </p>
+          <div style={{ marginTop: 4 }}>
+            <a href="#section-2" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+          </div>
         </Step>
         <Step num={2}>
           <p>
             <strong>[현장 도착] 방문 대상 확인</strong><br />
-            앱을 켜고 &apos;오늘의 방문 명단&apos;에서 방문할 집을 확인 후 이동합니다. <a href="#section-3" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+            앱을 켜고 &apos;오늘의 방문 명단&apos;에서 방문할 집을 확인 후 이동합니다.
           </p>
+          <div style={{ marginTop: 4 }}>
+            <a href="#section-3" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+          </div>
         </Step>
         <Step num={3}>
           <p>
             <strong>[방문 및 녹음] 상담 진행</strong><br />
             벨을 누르기 전 <strong>클로바노트</strong>를 켜고 녹음을 시작합니다.<br />
-            체납자와 상담을 진행하거나, 부재중일 경우 &quot;아무도 안 계시네요, 안내문 부착하겠습니다&quot;라고 말해 녹음합니다. <a href="#section-4" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+            체납자와 상담을 진행하거나, 부재중일 경우 &quot;아무도 안 계시네요, 안내문 부착하겠습니다&quot;라고 말해 녹음합니다.
           </p>
+          <div style={{ marginTop: 4 }}>
+            <a href="#section-4" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+          </div>
         </Step>
         <Step num={4}>
           <p>
             <strong>[현장 사진 촬영 & 기록 공유]</strong><br />
             상담 종료 후, 클로바노트에서 텍스트로 변환하고 <strong>Field-Master로 공유</strong>합니다.<br />
-            앱이 열리면 대상자를 선택하고, <strong>[📸 현장 사진]</strong> 버튼을 눌러 문 앞이나 안내문이 붙은 사진을 방금 찍어 함께 저장합니다. <a href="#section-5" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+            앱이 열리면 대상자를 선택하고, <strong>[📸 현장 사진]</strong> 버튼을 눌러 문 앞이나 안내문이 붙은 사진을 방금 찍어 함께 저장합니다.
           </p>
+          <div style={{ marginTop: 4 }}>
+            <a href="#section-5" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+          </div>
         </Step>
         <Step num={5}>
           <p>
             <strong>[사후 조치] 예약 및 문자 발송</strong><br />
-            저장을 완료한 뒤, 필요하다면 바로 다음 재방문 날짜를 예약하거나 안내 문자를 발송합니다. <a href="#section-6" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+            저장을 완료한 뒤, 필요하다면 바로 다음 재방문 날짜를 예약하거나 안내 문자를 발송합니다.
           </p>
+          <div style={{ marginTop: 4 }}>
+            <a href="#section-6" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
+          </div>
         </Step>
       </Section>
 
