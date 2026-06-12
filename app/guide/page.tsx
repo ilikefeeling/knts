@@ -236,6 +236,10 @@ export default function GuidePage() {
             <strong> 특이사항</strong>을 자동으로 채워줍니다.
           </p>
           <p>
+            <strong>📸 현장 사진</strong> 영역의 <strong>&quot;+ 사진 촬영&quot;</strong> 버튼을 눌러
+            현장 방문 증빙 사진을 바로 찍거나 앨범에서 추가할 수 있습니다. (최대 5장)
+          </p>
+          <p>
             내용이 맞으면 그대로 <strong>&quot;✓ 저장하기&quot;</strong>를 누르세요.
             수정이 필요하면 직접 고친 뒤 저장하시면 됩니다.
           </p>

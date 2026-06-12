@@ -16,7 +16,7 @@ import {
 import { CHANGE_REASON_CATEGORIES, VISIT_TIME_OPTIONS } from "@/lib/constants";
 import SmsComposer from "@/components/SmsComposer";
 
-type ModalType = "edit" | "history" | "sms" | null;
+type ModalType = "edit" | "history" | "sms" | "photo" | null;
 
 export default function LedgerPage() {
   const [records, setRecords] = useState<LedgerRecord[]>([]);
@@ -226,6 +226,9 @@ export default function LedgerPage() {
               )}
             </div>
             <div className="ledger-card-actions">
+              {r.lastVisitPhotos && r.lastVisitPhotos.length > 0 && (
+                <button className="btn-sm" onClick={() => { setActiveRecord(r); setModal("photo"); }}>📸 사진</button>
+              )}
               {r.contact && (
                 <button className="btn-sm" onClick={() => openSms(r)}>📱 문자</button>
               )}
@@ -383,6 +386,26 @@ export default function LedgerPage() {
           record={activeRecord}
           onClose={() => setModal(null)}
         />
+      )}
+
+      {/* ── 사진 모달 ── */}
+      {modal === "photo" && activeRecord && (
+        <div className="modal-overlay" onClick={() => setModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>📸 현장 사진 — {activeRecord.name}</h3>
+            <div className="ledger-photo-grid">
+              {activeRecord.lastVisitPhotos?.map((src, idx) => (
+                <div key={idx} style={{ marginBottom: 16, textAlign: "center" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt={`현장 사진 ${idx + 1}`} style={{ maxWidth: "100%", borderRadius: 8, border: "1px solid var(--color-border)" }} />
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: "1rem", textAlign: "right" }}>
+              <button className="btn-primary" onClick={() => setModal(null)}>닫기</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

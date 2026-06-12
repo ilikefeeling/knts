@@ -20,6 +20,7 @@ export type LedgerRecord = {
   lastVisitResult: string | null;
   lastVisitDate: string | null;
   lastVisitSummary: string | null;
+  lastVisitPhotos: string[];       // base64 data URL 배열 (현장 사진)
   visitCount: number;
   createdAt: string;  // ISO 8601
   updatedAt: string;  // ISO 8601
@@ -173,6 +174,7 @@ export async function upsertFromExcel(
         lastVisitResult: null,
         lastVisitDate: null,
         lastVisitSummary: null,
+        lastVisitPhotos: [],
         visitCount: 0,
         createdAt: now,
         updatedAt: now,
@@ -193,7 +195,8 @@ export async function updateVisitResult(
   result: string,
   summary: string,
   nextDate?: string | null,
-  nextTime?: string | null
+  nextTime?: string | null,
+  photos?: string[]
 ): Promise<LedgerRecord | null> {
   const record = await getRecord(id);
   if (!record) return null;
@@ -204,6 +207,7 @@ export async function updateVisitResult(
     lastVisitResult: result,
     lastVisitDate: todayStr(),
     lastVisitSummary: summary,
+    lastVisitPhotos: photos ?? record.lastVisitPhotos ?? [],
     visitCount: record.visitCount + 1,
     nextVisitDate: nextDate ?? null,
     nextVisitTime: nextTime ?? null,

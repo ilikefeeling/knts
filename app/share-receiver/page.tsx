@@ -13,6 +13,7 @@ import {
   type LedgerRecord,
 } from "@/lib/ledgerDB";
 import { addLog } from "@/lib/auditLog";
+import PhotoCapture from "@/components/PhotoCapture";
 import {
   canUseAutoClassify,
   incrementUsage,
@@ -48,6 +49,9 @@ function ShareReceiverInner() {
   // 재방문 예약 상태
   const [revisitDate, setRevisitDate] = useState("");
   const [revisitTime, setRevisitTime] = useState("");
+
+  // 현장 사진
+  const [photos, setPhotos] = useState<string[]>([]);
 
   // AI 자동분류 사용량(Freemium) 상태
   const [limitReached, setLimitReached] = useState(false);
@@ -163,7 +167,8 @@ function ShareReceiverInner() {
       result,
       summary,
       nextDate,
-      nextTime
+      nextTime,
+      photos
     );
 
     // 2) Audit Log: 현장 방문 기록
@@ -178,6 +183,7 @@ function ShareReceiverInner() {
       after: {
         lastVisitResult: result,
         lastVisitSummary: summary,
+        lastVisitPhotos: photos.length > 0 ? `${photos.length}장` : "없음",
         visitCount: (selectedTarget.visitCount || 0) + 1,
       },
       reason: "현장 방문 기록",
@@ -427,6 +433,16 @@ function ShareReceiverInner() {
             onChange={(e) => setSummary(e.target.value)}
             disabled={classifying}
           />
+
+          {/* ── 현장 사진 촬영 ── */}
+          {!classifying && (
+            <PhotoCapture
+              photos={photos}
+              onChange={setPhotos}
+              maxPhotos={5}
+              disabled={saved}
+            />
+          )}
 
           {!classifying && !limitReached && (
             <button
