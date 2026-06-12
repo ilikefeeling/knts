@@ -13,6 +13,13 @@ import {
   type LedgerRecord,
 } from "@/lib/ledgerDB";
 import { addLog } from "@/lib/auditLog";
+import {
+  canUseAutoClassify,
+  incrementUsage,
+  getRemainingFree,
+  isProUser,
+  FREE_MONTHLY_LIMIT,
+} from "@/lib/usage";
 
 function ShareReceiverInner() {
   const searchParams = useSearchParams();
@@ -41,6 +48,16 @@ function ShareReceiverInner() {
   // 재방문 예약 상태
   const [revisitDate, setRevisitDate] = useState("");
   const [revisitTime, setRevisitTime] = useState("");
+
+  // AI 자동분류 사용량(Freemium) 상태
+  const [limitReached, setLimitReached] = useState(false);
+  const [remaining, setRemaining] = useState(FREE_MONTHLY_LIMIT);
+  const [proUser, setProUserState] = useState(false);
+
+  useEffect(() => {
+    setRemaining(getRemainingFree());
+    setProUserState(isProUser());
+  }, []);
 
   // 오늘 방문 대상 로드
   const loadVisits = useCallback(async () => {
@@ -100,6 +117,10 @@ function ShareReceiverInner() {
       } else {
         setResult(data.result);
         setSummary(data.summary || "");
+        if (!isProUser()) {
+          const updated = incrementUsage();
+          setRemaining(Math.max(0, FREE_MONTHLY_LIMIT - updated.count));
+        }
       }
     } catch {
       setClassifyError("자동분류 중 오류가 발생했습니다. 직접 입력해주세요.");
@@ -110,13 +131,21 @@ function ShareReceiverInner() {
 
   function goToStep3AndClassify() {
     setStep(3);
-    if (sharedText) {
-      runClassify(sharedText);
+    if (!sharedText) return;
+
+    if (!canUseAutoClassify()) {
+      setLimitReached(true);
+      return;
     }
+    runClassify(sharedText);
   }
 
   function handleRetry() {
     if (retryUsed || !sharedText) return;
+    if (!canUseAutoClassify()) {
+      setLimitReached(true);
+      return;
+    }
     setRetryUsed(true);
     runClassify(sharedText);
   }
@@ -313,6 +342,41 @@ function ShareReceiverInner() {
             </div>
           )}
 
+          {limitReached && !proUser && (
+            <div
+              className="card"
+              style={{
+                background: "var(--color-primary-bg)",
+                border: "none",
+              }}
+            >
+              <p style={{ margin: "0 0 8px", fontWeight: 700 }}>
+                이번 달 무료 자동분류({FREE_MONTHLY_LIMIT}건)를 모두
+                사용했어요
+              </p>
+              <p style={{ margin: "0 0 12px", fontSize: 14, color: "var(--color-text-muted)" }}>
+                아래 항목은 직접 선택/입력하면 그대로 저장됩니다. AI 자동분류를
+                계속 이용하시려면 Pro로 업그레이드해주세요.
+              </p>
+              <a className="btn btn-primary" href="/pricing">
+                ✨ Pro 요금제 보기
+              </a>
+            </div>
+          )}
+
+          {!proUser && !limitReached && !classifying && (
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--color-text-muted)",
+                margin: "0 0 12px",
+              }}
+            >
+              이번 달 AI 자동분류 {FREE_MONTHLY_LIMIT - remaining}/
+              {FREE_MONTHLY_LIMIT}건 사용
+            </p>
+          )}
+
           {classifyError && (
             <p style={{ fontSize: 14, color: "#a33" }}>{classifyError}</p>
           )}
@@ -364,7 +428,7 @@ function ShareReceiverInner() {
             disabled={classifying}
           />
 
-          {!classifying && (
+          {!classifying && !limitReached && (
             <button
               className={"btn btn-ghost" + (retryUsed ? " btn-disabled" : "")}
               onClick={handleRetry}

@@ -12,7 +12,7 @@ type Props = {
 
 export default function SmsComposer({ record, onClose }: Props) {
   const [templateIdx, setTemplateIdx] = useState(0);
-  const [body, setBody] = useState(SMS_TEMPLATES[0].body);
+  const [body, setBody] = useState<string>(SMS_TEMPLATES[0].body);
   const [sent, setSent] = useState(false);
 
   const handleTemplate = (idx: number) => {
@@ -20,7 +20,7 @@ export default function SmsComposer({ record, onClose }: Props) {
     const tpl = SMS_TEMPLATES[idx];
     if (tpl.body) {
       // 날짜/시간 플레이스홀더 치환
-      let text = tpl.body;
+      let text: string = tpl.body;
       if (record.nextVisitDate) {
         const parts = record.nextVisitDate.split("-");
         text = text.replace("{날짜}", `${parts[1]}/${parts[2]}`);

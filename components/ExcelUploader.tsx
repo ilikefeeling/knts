@@ -37,7 +37,7 @@ export default function ExcelUploader({ onComplete }: Props) {
       // 첫 행이 헤더인지 확인 → 데이터 행만 추출
       const dataRows: ExcelRow[] = [];
       for (let i = 0; i < json.length; i++) {
-        const r = json[i] as unknown[];
+        const r = json[i] as unknown as unknown[];
         if (!r || r.length < 3) continue;
 
         const name = String(r[1] || "").trim();

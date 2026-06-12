@@ -25,7 +25,9 @@ export default function NavBar() {
             ? "iOS 안내"
             : pathname === "/ledger"
               ? "방문 관리"
-              : "상담 기록"}
+              : pathname === "/pricing"
+                ? "요금제"
+                : "상담 기록"}
       </div>
       <div className="navbar-right">
         {!isHome && (

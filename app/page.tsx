@@ -74,6 +74,9 @@ export default function Home() {
         <Link href="/ledger" className="home-link-btn">
           📋 방문 관리
         </Link>
+        <Link href="/pricing" className="home-link-btn">
+          ✨ 요금제
+        </Link>
         <Link href="/ios-guide" className="home-link-btn">
           🍎 iOS 안내
         </Link>
