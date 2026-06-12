@@ -1,0 +1,237 @@
+/* ── 가이드 페이지 전용 스타일 ── */
+
+.guide-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+.guide-hero {
+  text-align: center;
+  padding: 1.5rem 0 1rem;
+}
+
+.guide-hero h1 {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: var(--color-text);
+}
+
+.guide-hero p {
+  font-size: 16px;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── 아코디언 섹션 ── */
+.guide-section {
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-card-bg);
+}
+
+.guide-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  user-select: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--color-text);
+  transition: background 0.15s;
+}
+
+.guide-section-header:hover {
+  background: var(--color-hover-bg, rgba(0, 0, 0, 0.03));
+}
+
+.guide-section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.guide-section-title {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.guide-section-arrow {
+  font-size: 20px;
+  transition: transform 0.2s;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.guide-section.open .guide-section-arrow {
+  transform: rotate(180deg);
+}
+
+.guide-section-body {
+  display: none;
+  padding: 0 18px 20px;
+}
+
+.guide-section.open .guide-section-body {
+  display: block;
+}
+
+/* ── 단계 ── */
+.guide-step {
+  margin-bottom: 24px;
+}
+
+.guide-step:last-child {
+  margin-bottom: 0;
+}
+
+.guide-step-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.guide-step-label .step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.guide-step p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0 0 12px;
+}
+
+.guide-step strong {
+  color: var(--color-primary);
+}
+
+/* ── 스크린샷 ── */
+.guide-screenshot {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin: 8px 0 4px;
+}
+
+.guide-screenshot-caption {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0 0 16px;
+  padding-left: 4px;
+}
+
+/* ── 팁 박스 ── */
+.guide-tip {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 12px 0;
+  color: #92400e;
+}
+
+.guide-tip::before {
+  content: "💡 ";
+}
+
+.guide-warning {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 12px 0;
+  color: #991b1b;
+}
+
+.guide-warning::before {
+  content: "⚠️ ";
+}
+
+.guide-info {
+  background: var(--color-primary-bg);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 12px 0;
+  color: var(--color-text);
+}
+
+.guide-info::before {
+  content: "ℹ️ ";
+}
+
+/* ── FAQ ── */
+.guide-faq-item {
+  margin-bottom: 16px;
+}
+
+.guide-faq-q {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--color-text);
+}
+
+.guide-faq-a {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  margin: 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--color-primary);
+}
+
+/* ── 하단 ── */
+.guide-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.guide-footer p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0;
+}

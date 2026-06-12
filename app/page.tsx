@@ -99,6 +99,9 @@ export default function Home() {
         <Link href="/pricing" className="home-link-btn">
           ✨ 요금제
         </Link>
+        <Link href="/guide" className="home-link-btn">
+          📖 사용 가이드
+        </Link>
         <Link href="/ios-guide" className="home-link-btn">
           🍎 iOS 안내
         </Link>

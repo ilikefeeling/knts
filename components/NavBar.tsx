@@ -27,7 +27,9 @@ export default function NavBar() {
               ? "방문 관리"
               : pathname === "/pricing"
                 ? "요금제"
-                : "상담 기록"}
+                : pathname === "/guide"
+                  ? "사용 가이드"
+                  : "상담 기록"}
       </div>
       <div className="navbar-right">
         {!isHome && (
