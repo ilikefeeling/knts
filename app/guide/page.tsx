@@ -59,6 +59,46 @@ export default function GuidePage() {
         </p>
       </div>
 
+      {/* ── 실전 따라하기 ── */}
+      <Section number={0} title="🔥 실무자용: 현장 방문 A to Z" defaultOpen>
+        <p style={{ fontSize: 16, lineHeight: 1.7, marginBottom: 16 }}>
+          실제 업무 순서대로 앱을 어떻게 사용하는지 흐름을 파악해 보세요.
+        </p>
+
+        <Step num={1}>
+          <p>
+            <strong>[출발 전] 명단 준비하기</strong><br />
+            사무실에서 엑셀로 오늘 방문할 명단을 업로드합니다. <span style={{ color: "var(--color-primary)", fontSize: 14 }}>(👉 아래 2장 참고)</span>
+          </p>
+        </Step>
+        <Step num={2}>
+          <p>
+            <strong>[현장 도착] 방문 대상 확인</strong><br />
+            앱을 켜고 &apos;오늘의 방문 명단&apos;에서 방문할 집을 확인 후 이동합니다. <span style={{ color: "var(--color-primary)", fontSize: 14 }}>(👉 아래 3장 참고)</span>
+          </p>
+        </Step>
+        <Step num={3}>
+          <p>
+            <strong>[방문 및 녹음] 상담 진행</strong><br />
+            벨을 누르기 전 <strong>클로바노트</strong>를 켜고 녹음을 시작합니다.<br />
+            체납자와 상담을 진행하거나, 부재중일 경우 &quot;아무도 안 계시네요, 안내문 부착하겠습니다&quot;라고 말해 녹음합니다. <span style={{ color: "var(--color-primary)", fontSize: 14 }}>(👉 아래 4장 참고)</span>
+          </p>
+        </Step>
+        <Step num={4}>
+          <p>
+            <strong>[현장 사진 촬영 & 기록 공유]</strong><br />
+            상담 종료 후, 클로바노트에서 텍스트로 변환하고 <strong>Field-Master로 공유</strong>합니다.<br />
+            앱이 열리면 대상자를 선택하고, <strong>[📸 현장 사진]</strong> 버튼을 눌러 문 앞이나 안내문이 붙은 사진을 방금 찍어 함께 저장합니다. <span style={{ color: "var(--color-primary)", fontSize: 14 }}>(👉 아래 5장 참고)</span>
+          </p>
+        </Step>
+        <Step num={5}>
+          <p>
+            <strong>[사후 조치] 예약 및 문자 발송</strong><br />
+            저장을 완료한 뒤, 필요하다면 바로 다음 재방문 날짜를 예약하거나 안내 문자를 발송합니다. <span style={{ color: "var(--color-primary)", fontSize: 14 }}>(👉 아래 6장, 8장 참고)</span>
+          </p>
+        </Step>
+      </Section>
+
       {/* ── 1장: 설치 ── */}
       <Section number={1} title="설치하기 (처음 한 번만)" defaultOpen>
         <div className="guide-info">
@@ -250,6 +290,11 @@ export default function GuidePage() {
           <strong> &quot;↻ 다시 분석하기&quot;</strong>를 한 번 더 누를 수 있습니다.
           (1회 추가 사용 가능)
         </div>
+
+        <div className="guide-warning">
+          <strong>주의:</strong> 저장하기 전에 뒤로 가기를 누르거나 새로고침하면 1단계부터 다시 시작해야 합니다.
+          2단계에서 대상을 다시 선택해 &quot;자동 정리하기&quot;를 누르면 AI 분석 한도가 1회 더 차감될 수 있으니 주의하세요.
+        </div>
       </Section>
 
       {/* ── 6장: 재방문 예약 ── */}
@@ -420,6 +465,17 @@ export default function GuidePage() {
             현재 데이터는 각 기기(브라우저)에 저장됩니다.
             다른 기기에서 보시려면 같은 기기·같은 브라우저로 접속해주세요.
             기기 간 동기화 기능은 추후 Pro에서 제공 예정입니다.
+          </p>
+        </div>
+
+        <div className="guide-faq-item">
+          <p className="guide-faq-q">
+            Q. 3단계 저장 전에 실수로 나갔는데 어떻게 하나요?
+          </p>
+          <p className="guide-faq-a">
+            스마트폰의 &apos;최근 앱 보기&apos;를 통해 브라우저를 다시 켜시면 3단계가 유지되어 있습니다.
+            하지만 실수로 &apos;새로고침&apos;이나 &apos;뒤로 가기&apos;를 누르셨다면 진행 상태가 초기화되어 1단계부터 다시 하셔야 합니다.
+            이때 AI 자동분류를 다시 요청하면 무료 횟수 한도(15건)가 1건 더 차감될 수 있습니다.
           </p>
         </div>
       </Section>
