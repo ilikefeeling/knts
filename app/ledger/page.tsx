@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Fragment } from "react";
 import {
   getAllRecords,
   updateRecordFields,
@@ -13,8 +13,9 @@ import {
   formatTimestamp,
   type AuditLog,
 } from "@/lib/auditLog";
-import { CHANGE_REASON_CATEGORIES, VISIT_TIME_OPTIONS } from "@/lib/constants";
+import { CHANGE_REASON_CATEGORIES, VISIT_TIME_OPTIONS, RESULT_OPTIONS } from "@/lib/constants";
 import SmsComposer from "@/components/SmsComposer";
+import * as XLSX from "xlsx";
 
 type ModalType = "edit" | "history" | "sms" | "photo" | null;
 
@@ -22,6 +23,8 @@ export default function LedgerPage() {
   const [records, setRecords] = useState<LedgerRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("전체");
+  const [viewMode, setViewMode] = useState<"card" | "sheet">("card");
 
   // 모달 상태
   const [modal, setModal] = useState<ModalType>(null);
@@ -75,6 +78,61 @@ export default function LedgerPage() {
   const todayCount = records.filter((r) => r.nextVisitDate === todayStr).length;
   const scheduledCount = records.filter((r) => r.nextVisitDate && r.nextVisitDate > todayStr).length;
 
+  // 그룹화 로직 (방문결과별)
+  const groupedRecords = (() => {
+    const groups: Record<string, LedgerRecord[]> = {};
+    filtered.forEach((r) => {
+      let cat = r.lastVisitResult || "미방문";
+      
+      // 다음 예정일이 오늘 이후(오늘 포함)이면 방문예정 그룹으로 처리 (예약인 경우는 유지)
+      if (r.nextVisitDate && r.nextVisitDate >= todayStr && cat !== "예약") {
+        cat = "방문예정";
+      }
+
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(r);
+    });
+
+    const getOrder = (cat: string) => {
+      if (cat === "미방문") return -1;
+      const idx = RESULT_OPTIONS.indexOf(cat as any);
+      return idx !== -1 ? idx : 999;
+    };
+
+    let result = Object.keys(groups)
+      .sort((a, b) => getOrder(a) - getOrder(b))
+      .map((cat) => ({
+        category: cat,
+        items: groups[cat],
+      }));
+      
+    if (filterCategory !== "전체") {
+      result = result.filter(g => g.category === filterCategory);
+    }
+    
+    return result;
+  })();
+
+  function handleDownloadExcel() {
+    const data = filtered.map((r, idx) => ({
+      연번: idx + 1,
+      성명: r.name,
+      방문결과: r.lastVisitResult || "",
+      채무액: r.debtAmount || "",
+      주소: r.address,
+      연락처: r.contact || "",
+      최근방문일: r.lastVisitDate || "",
+      누적방문횟수: r.visitCount,
+      다음예정일: r.nextVisitDate || "",
+      다음예정시간: r.nextVisitTime || "",
+      비고: r.notes || "",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "방문원장");
+    XLSX.writeFile(workbook, `방문원장_${todayStr}.xlsx`);
+  }
+
   // ── 수정 모달 열기 ──
   function openEdit(rec: LedgerRecord) {
     setActiveRecord(rec);
@@ -102,9 +160,6 @@ export default function LedgerPage() {
       }
       if (editNextTime !== (activeRecord.nextVisitTime || "")) {
         changes.nextVisitTime = editNextTime || null;
-      }
-      if (editNotes !== (activeRecord.notes || "")) {
-        changes.notes = editNotes;
       }
 
       const result = await updateRecordFields(activeRecord.id, changes);
@@ -174,14 +229,61 @@ export default function LedgerPage() {
         </div>
       </div>
 
-      {/* ── 검색 ── */}
-      <div className="ledger-search">
-        <input
-          type="text"
-          placeholder="성명, 주소, 연락처로 검색..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* ── 검색 및 뷰 토글 ── */}
+      <div className="ledger-controls">
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <select 
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            style={{ 
+              flex: '0 0 auto', 
+              padding: '0 5px', 
+              borderRadius: 'var(--radius)', 
+              border: '1px solid var(--color-border)', 
+              backgroundColor: 'var(--color-bg)', 
+              color: 'var(--color-text)', 
+              height: '46px', 
+              fontSize: '14px' 
+            }}
+          >
+            <option value="전체">상태 전체</option>
+            <option value="미방문">미방문</option>
+            {RESULT_OPTIONS.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+          <div className="ledger-search" style={{ flex: 1, minWidth: '200px', marginBottom: 0 }}>
+            <input
+              type="text"
+              placeholder="성명, 주소, 연락처로 검색..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ height: '46px' }}
+            />
+          </div>
+        </div>
+        <div className="ledger-view-toggle">
+          <button
+            className={`btn-sm ${viewMode === "card" ? "active" : ""}`}
+            onClick={() => setViewMode("card")}
+          >
+            💳 카드형
+          </button>
+          <button
+            className={`btn-sm ${viewMode === "sheet" ? "active" : ""}`}
+            onClick={() => setViewMode("sheet")}
+          >
+            📊 시트형
+          </button>
+          <button
+            className="btn-sm"
+            onClick={handleDownloadExcel}
+            title="현재 목록을 엑셀로 다운로드"
+            style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)", marginLeft: "4px" }}
+          >
+            💾 다운로드
+          </button>
+        </div>
       </div>
 
       {/* ── 목록 ── */}
@@ -197,46 +299,106 @@ export default function LedgerPage() {
             {search ? "검색 결과가 없습니다." : "원장이 비어 있습니다.\n홈에서 엑셀 명단을 업로드해주세요."}
           </p>
         </div>
+      ) : viewMode === "card" ? (
+        <div className="ledger-groups">
+          {groupedRecords.map((group) => (
+            <div key={group.category} className="ledger-group">
+              <h3 className="ledger-group-title">
+                {group.category} <span className="ledger-group-count">{group.items.length}</span>
+              </h3>
+              {group.items.map((r) => (
+                <div key={r.id} className="ledger-card">
+                  <div className="ledger-card-top">
+                    <span className="ledger-card-name">{r.name}</span>
+                    {r.lastVisitResult && (
+                      <span className="badge-visit-count">{r.lastVisitResult}</span>
+                    )}
+                    {r.debtAmount && (
+                      <span className="ledger-card-debt">{r.debtAmount}</span>
+                    )}
+                  </div>
+                  <div className="ledger-card-info">
+                    {r.address}
+                    {r.contact && <> · {r.contact}</>}
+                    <br />
+                    {r.lastVisitDate ? (
+                      <>최근 방문: {r.lastVisitDate} · {r.visitCount}회</>
+                    ) : (
+                      <>방문 이력 없음</>
+                    )}
+                    {r.nextVisitDate && (
+                      <>
+                        {" · "}다음 예정: {r.nextVisitDate}
+                        {r.nextVisitTime && ` ${r.nextVisitTime}`}
+                      </>
+                    )}
+                  </div>
+                  <div className="ledger-card-actions">
+                    {r.lastVisitPhotos && r.lastVisitPhotos.length > 0 && (
+                      <button className="btn-sm" onClick={() => { setActiveRecord(r); setModal("photo"); }}>📸 사진</button>
+                    )}
+                    {r.contact && (
+                      <button className="btn-sm" onClick={() => openSms(r)}>📱 문자</button>
+                    )}
+                    <button className="btn-sm" onClick={() => openEdit(r)}>📝 수정</button>
+                    <button className="btn-sm" onClick={() => openHistory(r)}>📋 이력</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       ) : (
-        filtered.map((r) => (
-          <div key={r.id} className="ledger-card">
-            <div className="ledger-card-top">
-              <span className="ledger-card-name">{r.name}</span>
-              {r.lastVisitResult && (
-                <span className="badge-visit-count">{r.lastVisitResult}</span>
-              )}
-              {r.debtAmount && (
-                <span className="ledger-card-debt">{r.debtAmount}</span>
-              )}
-            </div>
-            <div className="ledger-card-info">
-              {r.address}
-              {r.contact && <> · {r.contact}</>}
-              <br />
-              {r.lastVisitDate ? (
-                <>최근 방문: {r.lastVisitDate} · {r.visitCount}회</>
-              ) : (
-                <>방문 이력 없음</>
-              )}
-              {r.nextVisitDate && (
-                <>
-                  {" · "}다음 예정: {r.nextVisitDate}
-                  {r.nextVisitTime && ` ${r.nextVisitTime}`}
-                </>
-              )}
-            </div>
-            <div className="ledger-card-actions">
-              {r.lastVisitPhotos && r.lastVisitPhotos.length > 0 && (
-                <button className="btn-sm" onClick={() => { setActiveRecord(r); setModal("photo"); }}>📸 사진</button>
-              )}
-              {r.contact && (
-                <button className="btn-sm" onClick={() => openSms(r)}>📱 문자</button>
-              )}
-              <button className="btn-sm" onClick={() => openEdit(r)}>📝 수정</button>
-              <button className="btn-sm" onClick={() => openHistory(r)}>📋 이력</button>
-            </div>
-          </div>
-        ))
+        <div className="ledger-sheet-wrap">
+          <table className="ledger-sheet">
+            <thead>
+              <tr>
+                <th>성명</th>
+                <th>방문결과</th>
+                <th>채무액</th>
+                <th>주소</th>
+                <th>연락처</th>
+                <th>최근 방문</th>
+                <th>다음 예정</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedRecords.map((group) => (
+                <Fragment key={group.category}>
+                  <tr className="ledger-group-row">
+                    <td colSpan={8}>
+                      {group.category} <span className="ledger-group-count">{group.items.length}</span>
+                    </td>
+                  </tr>
+                  {group.items.map((r) => (
+                    <tr key={r.id}>
+                      <td className="fw-bold">{r.name}</td>
+                      <td>{r.lastVisitResult || "-"}</td>
+                      <td className="text-danger fw-bold">{r.debtAmount || "-"}</td>
+                      <td className="truncate-text" title={r.address}>{r.address}</td>
+                      <td>{r.contact || "-"}</td>
+                      <td>{r.lastVisitDate ? `${r.lastVisitDate} (${r.visitCount}회)` : "-"}</td>
+                      <td>{r.nextVisitDate ? `${r.nextVisitDate} ${r.nextVisitTime || ""}` : "-"}</td>
+                      <td>
+                        <div className="ledger-sheet-actions">
+                          {r.lastVisitPhotos && r.lastVisitPhotos.length > 0 && (
+                            <button className="btn-icon" title="사진" onClick={() => { setActiveRecord(r); setModal("photo"); }}>📸</button>
+                          )}
+                          {r.contact && (
+                            <button className="btn-icon" title="문자" onClick={() => openSms(r)}>📱</button>
+                          )}
+                          <button className="btn-icon" title="수정" onClick={() => openEdit(r)}>📝</button>
+                          <button className="btn-icon" title="이력" onClick={() => openHistory(r)}>📋</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* ── 수정 모달 ── */}
@@ -244,28 +406,6 @@ export default function LedgerPage() {
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content edit-modal" onClick={(e) => e.stopPropagation()}>
             <h3>📝 수정 — {activeRecord.name}</h3>
-
-            <div className="edit-field">
-              <label>변경 사유 <span className="required">*</span></label>
-              <select
-                value={editReasonCat}
-                onChange={(e) => setEditReasonCat(e.target.value as typeof editReasonCat)}
-              >
-                {CHANGE_REASON_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="edit-field">
-              <label>사유 상세 <span className="required">*</span></label>
-              <textarea
-                rows={2}
-                value={editReasonDetail}
-                onChange={(e) => setEditReasonDetail(e.target.value)}
-                placeholder="변경 사유를 입력하세요 (필수)"
-              />
-            </div>
 
             <div className="edit-field">
               <label>다음 방문 예정일</label>
@@ -289,12 +429,28 @@ export default function LedgerPage() {
               </select>
             </div>
 
+            <hr style={{ margin: "1.5rem 0 1rem", border: 0, borderTop: "1px solid var(--color-border)" }} />
+            <h4 style={{ margin: "0 0 12px", fontSize: "14px", color: "var(--color-text)" }}>이력 기록용 사유 (필수)</h4>
+
             <div className="edit-field">
-              <label>비고</label>
+              <label>변경 사유 분류</label>
+              <select
+                value={editReasonCat}
+                onChange={(e) => setEditReasonCat(e.target.value as typeof editReasonCat)}
+              >
+                {CHANGE_REASON_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="edit-field">
+              <label>변경 사유 상세</label>
               <textarea
                 rows={2}
-                value={editNotes}
-                onChange={(e) => setEditNotes(e.target.value)}
+                value={editReasonDetail}
+                onChange={(e) => setEditReasonDetail(e.target.value)}
+                placeholder="무엇을 왜 변경했는지 간단히 입력하세요 (예: 연락처 변경요청)"
               />
             </div>
 

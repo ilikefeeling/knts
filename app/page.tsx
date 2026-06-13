@@ -179,36 +179,75 @@ export default function Home() {
       <div className="card card-muted">
         <ol style={{ margin: 0, paddingLeft: "1.2rem", fontSize: 15 }}>
           <li style={{ marginBottom: 8 }}>
-            상담 후, 클로바노트(또는 음성 변환 앱)에서 녹음 내용을 텍스트로
-            변환합니다.
+            방명 명단에서 대상을 선택 후 <strong>클로바노트 앱 실행하기(현장 사진찍기)</strong>를 누릅니다.
+          </li>
+          <li style={{ marginBottom: 8 }}>
+            현장에서 필요한 사진을 촬영하고, 클로바노트에서 상담 내용을 녹음 및 텍스트로 변환합니다.
           </li>
           <li style={{ marginBottom: 8 }}>
             변환된 텍스트 화면에서 <strong>공유</strong> 버튼을 눌러{" "}
             <strong>Field-Master</strong>를 선택합니다.
           </li>
           <li style={{ marginBottom: 8 }}>
-            화면에 나오는 안내에 따라 방문 대상자를 선택하면, AI가 방문결과와
-            특이사항을 자동으로 정리해줍니다.
+            앱으로 돌아오면 AI가 방문결과와 특이사항을 자동으로 정리해줍니다.
           </li>
-          <li>내용을 확인하고 저장하면 끝입니다.</li>
+          <li>촬영한 사진을 등록하고 최종 저장하면 완료됩니다.</li>
         </ol>
       </div>
 
-      {/* ── 테스트 시뮬레이션 모달 ── */}
+      {/* ── 현장 작업 모달 (클로바노트 연결 & 테스트) ── */}
       {modalTarget && (
         <div className="modal-overlay" onClick={() => setModalTarget(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>🧪 테스트: {modalTarget.name}</h2>
-            <p>
-              클로바노트에서 공유받은 상담 녹취록을 시뮬레이션합니다.
-              아래에 녹취록 텍스트를 입력하고 전송하세요.
+            <h2>📍 {modalTarget.name} - 현장 작업</h2>
+
+            <div style={{ margin: "1rem 0" }}>
+              <a
+                href="intent://#Intent;package=com.naver.clovanote;scheme=clovanote;end;"
+                className="btn btn-primary"
+                style={{
+                  display: "block",
+                  textAlign: "center",
+                  fontSize: "16px",
+                  padding: "12px",
+                  marginBottom: "8px",
+                  textDecoration: "none",
+                }}
+              >
+                🎙️ 클로바노트 앱 실행하기(현장 사진찍기)
+              </a>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "var(--color-text-muted)",
+                  lineHeight: 1.4,
+                  marginTop: 4,
+                }}
+              >
+                * 스마트폰에 설치된 클로바노트가 바로 실행됩니다.<br />
+                * 녹음 종료 후 <b>[공유] → [Field-Master]</b>를 선택하면<br />
+                이 앱으로 다시 돌아와 자동으로 방문 결과를 정리합니다.
+              </p>
+            </div>
+
+            <hr
+              style={{
+                border: 0,
+                borderTop: "1px solid var(--color-border)",
+                margin: "1.5rem 0 1rem",
+              }}
+            />
+
+            <h4 style={{ margin: "0 0 8px" }}>🧪 텍스트 직접 입력 (테스트용)</h4>
+            <p style={{ fontSize: 14, margin: "0 0 8px" }}>
+              PC 환경이거나 텍스트를 직접 복사한 경우 아래에 붙여넣고 전송하세요.
             </p>
             <textarea
-              rows={7}
+              rows={5}
               value={testText}
               onChange={(e) => setTestText(e.target.value)}
               placeholder="상담 녹취 텍스트를 입력하세요..."
-              style={{ marginBottom: 0 }}
+              style={{ marginBottom: 12 }}
             />
             <div className="modal-actions">
               <button
@@ -220,13 +259,14 @@ export default function Home() {
               </button>
               <button
                 className={
-                  "btn btn-primary" +
+                  "btn btn-ghost" +
                   (submitting || !testText.trim() ? " btn-disabled" : "")
                 }
+                style={{ background: "var(--color-surface)" }}
                 onClick={handleTestSubmit}
                 disabled={submitting || !testText.trim()}
               >
-                {submitting ? "전송 중..." : "전송하여 테스트 →"}
+                {submitting ? "전송 중..." : "전송하여 진행 →"}
               </button>
             </div>
           </div>

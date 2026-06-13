@@ -2,6 +2,8 @@
 export const APP_URL = "https://knts.vercel.app";
 
 export const RESULT_OPTIONS = [
+  "방문예정",
+  "예약",
   "접촉성공",
   "부재중",
   "연락두절",

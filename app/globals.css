@@ -1121,3 +1121,119 @@ button.btn-cancel {
   max-height: 60vh;
   overflow-y: auto;
 }
+
+/* ── 원장 관리 컨트롤 (검색 및 뷰 토글) ── */
+.ledger-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.ledger-view-toggle {
+  display: flex;
+  gap: 6px;
+}
+.ledger-view-toggle .btn-sm {
+  flex: 1;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* ── 원장 관리 그룹 헤더 ── */
+.ledger-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.ledger-group-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ledger-group-count {
+  background: var(--color-primary-light, #e0e7ff);
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.ledger-group-row td {
+  background: var(--color-bg-secondary);
+  font-weight: 700;
+  color: var(--color-primary);
+  padding: 10px 16px;
+  text-align: left;
+}
+.ledger-group-row .ledger-group-count {
+  margin-left: 8px;
+}
+.ledger-view-toggle .btn-sm.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* ── 시트형(테이블) 뷰 ── */
+.ledger-sheet-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  -webkit-overflow-scrolling: touch;
+}
+.ledger-sheet {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 800px;
+}
+.ledger-sheet th {
+  background: var(--color-bg-secondary);
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.ledger-sheet td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+.ledger-sheet tr:last-child td {
+  border-bottom: none;
+}
+.ledger-sheet tr:hover td {
+  background-color: var(--color-primary-bg);
+}
+.ledger-sheet .fw-bold { font-weight: 700; }
+.ledger-sheet .text-danger { color: #c0392b; }
+.ledger-sheet .truncate-text {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ledger-sheet-actions {
+  display: flex;
+  gap: 4px;
+}
+.ledger-sheet-actions .btn-icon {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+.ledger-sheet-actions .btn-icon:hover {
+  background: var(--color-bg-secondary);
+}

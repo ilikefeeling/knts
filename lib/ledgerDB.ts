@@ -1,14 +1,10 @@
-// ─── 원장(마스터 DB) — IndexedDB 기반 ───
-// 브라우저 로컬에 체납자 원장 데이터를 누적 보관합니다.
-// localStorage(5~10MB 제한)와 달리 IndexedDB는 용량 제한이 거의 없어
-// 원장이 누적되더라도 안정적으로 동작합니다.
+"use server";
 
-const DB_NAME = "fieldmaster_ledger";
-const DB_VERSION = 1;
-const STORE_NAME = "records";
+import { createClient } from "@/utils/supabase/server";
 
 export type LedgerRecord = {
   id: string;
+  user_id: string;
   name: string;
   contact: string;
   address: string;
@@ -20,31 +16,11 @@ export type LedgerRecord = {
   lastVisitResult: string | null;
   lastVisitDate: string | null;
   lastVisitSummary: string | null;
-  lastVisitPhotos: string[];       // base64 data URL 배열 (현장 사진)
+  lastVisitPhotos: string[];       // 이미지 URL 배열
   visitCount: number;
-  createdAt: string;  // ISO 8601
-  updatedAt: string;  // ISO 8601
+  createdAt: string;
+  updatedAt: string;
 };
-
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-        store.createIndex("name_address", ["name", "address"], { unique: false });
-        store.createIndex("nextVisitDate", "nextVisitDate", { unique: false });
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
 
 function todayStr(): string {
   const d = new Date();
@@ -54,49 +30,69 @@ function todayStr(): string {
   return `${y}-${m}-${day}`;
 }
 
-// ─── CRUD ───
-
 export async function getAllRecords(): Promise<LedgerRecord[]> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result as LedgerRecord[]);
-    req.onerror = () => reject(req.error);
-  });
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data, error } = await supabase
+    .from("records")
+    .select("*")
+    .order("createdAt", { ascending: false });
+
+  if (error) throw error;
+  return data as LedgerRecord[];
 }
 
 export async function getRecord(id: string): Promise<LedgerRecord | undefined> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.get(id);
-    req.onsuccess = () => resolve(req.result as LedgerRecord | undefined);
-    req.onerror = () => reject(req.error);
-  });
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data, error } = await supabase
+    .from("records")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) return undefined;
+  return data as LedgerRecord;
 }
 
-export async function putRecord(record: LedgerRecord): Promise<void> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    store.put(record);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
+export async function putRecord(record: Partial<LedgerRecord>): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
 
-// ─── 오늘의 방문명단 ───
+  // user_id를 자동으로 주입
+  const recordToUpsert = {
+    ...record,
+    user_id: user.id,
+  };
+
+  const { error } = await supabase
+    .from("records")
+    .upsert(recordToUpsert);
+
+  if (error) throw error;
+}
 
 export async function getTodayVisitList(): Promise<LedgerRecord[]> {
-  const all = await getAllRecords();
-  const today = todayStr();
-  const list = all.filter((r) => r.nextVisitDate === today);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
 
-  // 정렬: 예약시간 있는 건 우선 → 시간순
+  const today = todayStr();
+  
+  const { data, error } = await supabase
+    .from("records")
+    .select("*")
+    .eq("nextVisitDate", today);
+
+  if (error) throw error;
+
+  const list = data as LedgerRecord[];
+  
   list.sort((a, b) => {
     const ta = a.nextVisitTime || "99:99";
     const tb = b.nextVisitTime || "99:99";
@@ -105,8 +101,6 @@ export async function getTodayVisitList(): Promise<LedgerRecord[]> {
 
   return list;
 }
-
-// ─── 엑셀 업로드 → 원장 upsert ───
 
 export type ExcelRow = {
   name: string;
@@ -125,13 +119,16 @@ export type UpsertResult = {
 
 export async function upsertFromExcel(
   rows: ExcelRow[],
-  visitDate?: string // 업로드 시 방문 예정일 지정 (기본: 오늘)
+  visitDate?: string
 ): Promise<UpsertResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const all = await getAllRecords();
   const now = new Date().toISOString();
   const targetDate = visitDate || todayStr();
 
-  // 성명+주소 기준 기존 레코드 맵
   const existingMap = new Map<string, LedgerRecord>();
   for (const r of all) {
     existingMap.set(`${r.name}||${r.address}`, r);
@@ -146,8 +143,7 @@ export async function upsertFromExcel(
     const existing = existingMap.get(key);
 
     if (existing) {
-      // 기존 레코드 업데이트 (체납액, 연락처 등 갱신 + 방문예정일 설정)
-      const updatedRecord: LedgerRecord = {
+      const updatedRecord = {
         ...existing,
         contact: row.contact || existing.contact,
         debtAmount: row.debtAmount || existing.debtAmount,
@@ -158,11 +154,10 @@ export async function upsertFromExcel(
       };
       await putRecord(updatedRecord);
       updated++;
-      resultRecords.push({ record: updatedRecord, isNew: false });
+      resultRecords.push({ record: updatedRecord as LedgerRecord, isNew: false });
     } else {
-      // 신규 추가
-      const newRecord: LedgerRecord = {
-        id: generateId(),
+      const newRecord = {
+        user_id: user.id,
         name: row.name,
         contact: row.contact,
         address: row.address,
@@ -179,16 +174,22 @@ export async function upsertFromExcel(
         createdAt: now,
         updatedAt: now,
       };
-      await putRecord(newRecord);
-      created++;
-      resultRecords.push({ record: newRecord, isNew: true });
+      
+      const { data, error } = await supabase
+        .from("records")
+        .insert(newRecord)
+        .select()
+        .single();
+        
+      if (!error && data) {
+        created++;
+        resultRecords.push({ record: data as LedgerRecord, isNew: true });
+      }
     }
   }
 
   return { created, updated, records: resultRecords };
 }
-
-// ─── 현장기록 저장 ───
 
 export async function updateVisitResult(
   id: string,
@@ -202,7 +203,7 @@ export async function updateVisitResult(
   if (!record) return null;
 
   const now = new Date().toISOString();
-  const updated: LedgerRecord = {
+  const updated = {
     ...record,
     lastVisitResult: result,
     lastVisitDate: todayStr(),
@@ -215,10 +216,8 @@ export async function updateVisitResult(
   };
 
   await putRecord(updated);
-  return updated;
+  return updated as LedgerRecord;
 }
-
-// ─── 사후 수정 (사유 포함) ───
 
 export async function updateRecordFields(
   id: string,
@@ -228,14 +227,14 @@ export async function updateRecordFields(
   if (!record) return null;
 
   const before = { ...record };
-  const after: LedgerRecord = {
+  const after = {
     ...record,
     ...changes,
-    id: record.id, // ID는 변경 불가
-    createdAt: record.createdAt, // 생성일은 변경 불가
+    id: record.id,
+    createdAt: record.createdAt,
     updatedAt: new Date().toISOString(),
   };
 
   await putRecord(after);
-  return { before, after };
+  return { before, after: after as LedgerRecord };
 }

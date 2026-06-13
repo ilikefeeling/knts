@@ -130,14 +130,17 @@ export default function IosGuidePage() {
       <div className="card card-muted">
         <ol style={{ margin: 0, paddingLeft: "1.2rem", fontSize: 15 }}>
           <li style={{ marginBottom: 8 }}>
-            클로바노트에서 변환된 텍스트 화면 → <strong>공유</strong> 버튼
+            앱 홈 화면에서 <strong>클로바노트 앱 실행하기(현장 사진찍기)</strong> 버튼을 눌러 작업을 시작합니다.
+          </li>
+          <li style={{ marginBottom: 8 }}>
+            상담 내용 녹음 후 텍스트 변환 화면에서 <strong>공유</strong> 버튼을 누릅니다.
           </li>
           <li style={{ marginBottom: 8 }}>
             공유 목록에서 아래로 스크롤 → <strong>단축어</strong> →{" "}
-            <strong>Field-Master로 보내기</strong> 선택
+            <strong>Field-Master로 보내기</strong>를 선택합니다.
           </li>
           <li>
-            잠시 후 Safari가 열리면서 Field-Master의 방문 대상자 선택 화면이
+            잠시 후 Safari가 열리면서 Field-Master 화면이
             나타납니다. (이후 흐름은 안드로이드와 동일)
           </li>
         </ol>

@@ -92,7 +92,7 @@ export default function GuidePage() {
         <Step num={2}>
           <p>
             <strong>[현장 도착] 방문 대상 확인</strong><br />
-            앱을 켜고 &apos;오늘의 방문 명단&apos;에서 방문할 집을 확인 후 이동합니다.
+            앱을 켜고 &apos;오늘의 방문 명단&apos;에서 방문 대상을 누른 뒤 <strong>[🎙️ 클로바노트 앱 실행하기(현장 사진찍기)]</strong>를 누릅니다.
           </p>
           <div style={{ marginTop: 4 }}>
             <a href="#section-3" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
@@ -100,9 +100,9 @@ export default function GuidePage() {
         </Step>
         <Step num={3}>
           <p>
-            <strong>[방문 및 녹음] 상담 진행</strong><br />
-            벨을 누르기 전 <strong>클로바노트</strong>를 켜고 녹음을 시작합니다.<br />
-            체납자와 상담을 진행하거나, 부재중일 경우 &quot;아무도 안 계시네요, 안내문 부착하겠습니다&quot;라고 말해 녹음합니다.
+            <strong>[방문 및 사진/녹음] 현장 작업 진행</strong><br />
+            클로바노트가 실행되면 상담 내용을 녹음합니다. 현장에서 필요한 사진도 휴대폰 카메라로 함께 촬영합니다.<br />
+            (부재중일 경우 &quot;아무도 안 계시네요, 안내문 부착하겠습니다&quot;라고 말해 녹음합니다.)
           </p>
           <div style={{ marginTop: 4 }}>
             <a href="#section-4" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
@@ -110,9 +110,9 @@ export default function GuidePage() {
         </Step>
         <Step num={4}>
           <p>
-            <strong>[현장 사진 촬영 & 기록 공유]</strong><br />
+            <strong>[기록 공유 & 사진 등록]</strong><br />
             상담 종료 후, 클로바노트에서 텍스트로 변환하고 <strong>Field-Master로 공유</strong>합니다.<br />
-            앱이 열리면 대상자를 선택하고, <strong>[📸 현장 사진]</strong> 버튼을 눌러 문 앞이나 안내문이 붙은 사진을 방금 찍어 함께 저장합니다.
+            앱이 열리면 대상자를 선택하고, <strong>[📸 현장 사진]</strong> 영역에서 아까 찍어둔 사진을 등록한 뒤 함께 저장합니다.
           </p>
           <div style={{ marginTop: 4 }}>
             <a href="#section-5" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
@@ -253,13 +253,13 @@ export default function GuidePage() {
 
         <Step num={1}>
           <p>
-            현장에서 상담할 때 <strong>클로바노트</strong>(또는 다른 음성 변환 앱)로
-            대화 내용을 녹음합니다.
+            홈 화면 명단에서 대상자를 선택하고 <strong>클로바노트 앱 실행하기(현장 사진찍기)</strong> 버튼을 눌러 앱을 실행합니다. 현장 사진이 필요하면 휴대폰 카메라로 함께 촬영합니다.
           </p>
         </Step>
         <Step num={2}>
           <p>
-            녹음이 끝나면 클로바노트에서 <strong>텍스트로 변환</strong>합니다.
+            현장에서 상담할 때 <strong>클로바노트</strong>로 대화 내용을 녹음합니다.
+            녹음이 끝나면 <strong>텍스트로 변환</strong>합니다.
             변환이 완료되면 화면에 상담 내용이 글자로 표시됩니다.
           </p>
         </Step>
@@ -471,7 +471,7 @@ export default function GuidePage() {
           <p className="guide-faq-a">
             클로바노트의 &quot;공유&quot; 기능은 휴대폰에서만 동작합니다.
             PC에서는 홈 화면에서 대상자 카드를 클릭하면 나오는
-            &quot;테스트 시뮬레이션&quot;으로 녹취록을 직접 붙여넣어
+            &quot;현장 작업 모달&quot; 하단의 &quot;텍스트 직접 입력&quot;으로
             동일한 AI 분석을 사용하실 수 있습니다.
           </p>
         </div>
