@@ -77,17 +77,17 @@ export async function putRecord(record: Partial<LedgerRecord>): Promise<void> {
   if (error) throw error;
 }
 
-export async function getTodayVisitList(): Promise<LedgerRecord[]> {
+export async function getTodayVisitList(dateOverride?: string): Promise<LedgerRecord[]> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const today = todayStr();
+  const targetDate = dateOverride || todayStr();
   
   const { data, error } = await supabase
     .from("records")
     .select("*")
-    .eq("nextVisitDate", today);
+    .eq("nextVisitDate", targetDate);
 
   if (error) throw error;
 
@@ -119,15 +119,27 @@ export type UpsertResult = {
 
 export async function upsertFromExcel(
   rows: ExcelRow[],
-  visitDate?: string
-): Promise<UpsertResult> {
+  visitDate?: string,
+  isOverwrite: boolean = false
+): Promise<UpsertResult & { deleted?: number }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const targetDate = visitDate || todayStr();
+
+  // 교체 모드인 경우, 해당 방문 예정일의 기존 명단을 불러옵니다.
+  let existingForTargetDate: LedgerRecord[] = [];
+  if (isOverwrite) {
+    const { data: targetData } = await supabase
+      .from("records")
+      .select("*")
+      .eq("nextVisitDate", targetDate);
+    if (targetData) existingForTargetDate = targetData as LedgerRecord[];
+  }
+
   const all = await getAllRecords();
   const now = new Date().toISOString();
-  const targetDate = visitDate || todayStr();
 
   const existingMap = new Map<string, LedgerRecord>();
   for (const r of all) {
@@ -136,8 +148,35 @@ export async function upsertFromExcel(
 
   let created = 0;
   let updated = 0;
+  let deleted = 0;
   const resultRecords: { record: LedgerRecord; isNew: boolean }[] = [];
 
+  const incomingKeys = new Set(rows.map(r => `${r.name}||${r.address}`));
+
+  // 1. 교체(Overwrite) 정리 작업
+  if (isOverwrite) {
+    for (const record of existingForTargetDate) {
+      const key = `${record.name}||${record.address}`;
+      if (!incomingKeys.has(key)) {
+        // 새 엑셀 명단에 없는 기존 할당자
+        if (record.visitCount === 0 && !record.lastVisitDate) {
+          // 방문 이력이 전혀 없는 경우 영구 삭제 (잘못 추가된 찌꺼기)
+          await deleteRecord(record.id);
+          deleted++;
+        } else {
+          // 과거 방문 이력이 있는 경우, 오늘 예정일만 취소
+          const updatedRecord = {
+            ...record,
+            nextVisitDate: null,
+            updatedAt: now,
+          };
+          await putRecord(updatedRecord);
+        }
+      }
+    }
+  }
+
+  // 2. 새 데이터 추가 또는 갱신
   for (const row of rows) {
     const key = `${row.name}||${row.address}`;
     const existing = existingMap.get(key);
@@ -188,7 +227,42 @@ export async function upsertFromExcel(
     }
   }
 
-  return { created, updated, records: resultRecords };
+  return { created, updated, deleted, records: resultRecords };
+}
+
+export async function deleteListForDate(visitDate?: string): Promise<{ deleted: number; canceled: number }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const targetDate = visitDate || todayStr();
+  const { data: targetData } = await supabase
+    .from("records")
+    .select("*")
+    .eq("nextVisitDate", targetDate);
+
+  let deleted = 0;
+  let canceled = 0;
+  const now = new Date().toISOString();
+
+  if (targetData) {
+    for (const record of (targetData as LedgerRecord[])) {
+      if (record.visitCount === 0 && !record.lastVisitDate) {
+        await deleteRecord(record.id);
+        deleted++;
+      } else {
+        const updatedRecord = {
+          ...record,
+          nextVisitDate: null,
+          updatedAt: now,
+        };
+        await putRecord(updatedRecord);
+        canceled++;
+      }
+    }
+  }
+
+  return { deleted, canceled };
 }
 
 export async function updateVisitResult(
@@ -237,4 +311,17 @@ export async function updateRecordFields(
 
   await putRecord(after);
   return { before, after: after as LedgerRecord };
+}
+
+export async function deleteRecord(id: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase
+    .from("records")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
 }

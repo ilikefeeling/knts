@@ -13,6 +13,7 @@ export default function InstallPrompt() {
   const [installed, setInstalled] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isMobile, setIsMobile] = useState(true); // 모바일을 기본값으로(SSR/하이드레이션 직후 깜빡임 방지)
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
     // PWA가 이미 설치되어 standalone 모드로 실행 중인지 감지
@@ -24,14 +25,27 @@ export default function InstallPrompt() {
     // 모바일 여부 판단 (Android/iOS UA 기준)
     setIsMobile(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
 
+    // 숨김 처리 여부 확인
+    if (localStorage.getItem("hideInstallPrompt") === "true") {
+      setHidden(true);
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
     window.addEventListener("beforeinstallprompt", handler);
 
-    const installedHandler = () => setInstalled(true);
+    const installedHandler = () => {
+      setInstalled(true);
+      localStorage.setItem("hideInstallPrompt", "true");
+    };
     window.addEventListener("appinstalled", installedHandler);
+
+    // Safari 등에서 standalone 감지 추가 로직
+    if (standalone) {
+      localStorage.setItem("hideInstallPrompt", "true");
+    }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
@@ -39,14 +53,20 @@ export default function InstallPrompt() {
     };
   }, []);
 
-  // 이미 설치되어 standalone으로 실행 중이면 배너 자체를 숨김
-  if (isStandalone) {
+  const handleHide = () => {
+    localStorage.setItem("hideInstallPrompt", "true");
+    setHidden(true);
+  };
+
+  // 이미 설치되어 standalone으로 실행 중이거나 숨김 처리했으면 배너 자체를 숨김
+  if (isStandalone || hidden) {
     return null;
   }
 
   if (installed) {
     return (
-      <div className="card" style={{ background: "var(--color-success-bg)", color: "var(--color-success)", border: "none" }}>
+      <div className="card" style={{ background: "var(--color-success-bg)", color: "var(--color-success)", border: "none", position: "relative" }}>
+        <button onClick={handleHide} style={{ position: "absolute", top: "10px", right: "12px", background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "var(--color-success)" }}>✕</button>
         설치가 완료되었습니다.{" "}
         {isMobile
           ? "이제 클로바노트 등에서 \"공유\" 시 Field-Master를 선택할 수 있습니다."
@@ -58,8 +78,9 @@ export default function InstallPrompt() {
   if (!deferredPrompt) {
     if (isMobile) {
       return (
-        <div className="card card-muted">
-          <p style={{ marginBottom: 8, fontWeight: 700 }}>
+        <div className="card card-muted" style={{ position: "relative" }}>
+          <button onClick={handleHide} style={{ position: "absolute", top: "10px", right: "12px", background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "var(--color-text-muted)" }}>✕</button>
+          <p style={{ marginBottom: 8, fontWeight: 700, paddingRight: "20px" }}>
             휴대폰 홈화면에 추가가 필요해요
           </p>
           <p style={{ fontSize: 15, color: "var(--color-text-muted)", margin: 0 }}>
@@ -72,8 +93,9 @@ export default function InstallPrompt() {
     }
 
     return (
-      <div className="card card-muted">
-        <p style={{ marginBottom: 8, fontWeight: 700 }}>
+      <div className="card card-muted" style={{ position: "relative" }}>
+        <button onClick={handleHide} style={{ position: "absolute", top: "10px", right: "12px", background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "var(--color-text-muted)" }}>✕</button>
+        <p style={{ marginBottom: 8, fontWeight: 700, paddingRight: "20px" }}>
           PC에서 보고 계시네요
         </p>
         <p style={{ fontSize: 15, color: "var(--color-text-muted)", margin: "0 0 8px" }}>
@@ -91,15 +113,26 @@ export default function InstallPrompt() {
   }
 
   return (
-    <button
-      className="btn btn-primary"
-      onClick={async () => {
-        await deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
-        setDeferredPrompt(null);
-      }}
-    >
-      {isMobile ? "📲 휴대폰 홈화면에 설치하기" : "💻 PC에 설치하기"}
-    </button>
+    <div style={{ position: "relative", marginBottom: "1rem" }}>
+      <button
+        className="btn btn-primary"
+        onClick={async () => {
+          await deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+             setDeferredPrompt(null);
+          }
+        }}
+        style={{ paddingRight: "40px" }}
+      >
+        {isMobile ? "📲 휴대폰 홈화면에 설치하기" : "💻 앱으로 설치하기"}
+      </button>
+      <button 
+        onClick={handleHide} 
+        style={{ position: "absolute", top: "50%", right: "12px", transform: "translateY(-50%)", background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#ffffff", opacity: 0.8 }}
+      >
+        ✕
+      </button>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, Fragment } from "react";
 import {
   getAllRecords,
   updateRecordFields,
+  deleteRecord,
   type LedgerRecord,
 } from "@/lib/ledgerDB";
 import {
@@ -185,6 +186,21 @@ export default function LedgerPage() {
     }
   }
 
+  // ── 개별 삭제 ──
+  async function handleDelete(rec: LedgerRecord) {
+    if (!confirm(`정말로 '${rec.name}'님의 기록을 완전히 삭제하시겠습니까?\n(주의: 기존 방문 이력까지 모두 사라집니다)`)) {
+      return;
+    }
+    try {
+      await deleteRecord(rec.id);
+      alert("삭제되었습니다.");
+      loadRecords();
+    } catch (err) {
+      console.error("삭제 실패:", err);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  }
+
   // ── 이력 모달 열기 ──
   async function openHistory(rec: LedgerRecord) {
     setActiveRecord(rec);
@@ -342,6 +358,7 @@ export default function LedgerPage() {
                     )}
                     <button className="btn-sm" onClick={() => openEdit(r)}>📝 수정</button>
                     <button className="btn-sm" onClick={() => openHistory(r)}>📋 이력</button>
+                    <button className="btn-sm" onClick={() => handleDelete(r)} style={{ color: '#e74c3c', borderColor: '#fadbd8' }}>🗑️ 삭제</button>
                   </div>
                 </div>
               ))}
@@ -390,6 +407,7 @@ export default function LedgerPage() {
                           )}
                           <button className="btn-icon" title="수정" onClick={() => openEdit(r)}>📝</button>
                           <button className="btn-icon" title="이력" onClick={() => openHistory(r)}>📋</button>
+                          <button className="btn-icon" title="삭제" onClick={() => handleDelete(r)} style={{ color: '#e74c3c' }}>🗑️</button>
                         </div>
                       </td>
                     </tr>

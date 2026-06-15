@@ -58,3 +58,21 @@ WITH CHECK (
   bucket_id = 'photos' AND 
   auth.role() = 'authenticated'
 );
+
+-- 5. shared_texts 테이블 생성 (단축어 공유 데이터 임시 저장)
+CREATE TABLE shared_texts (
+  id TEXT PRIMARY KEY,
+  text TEXT NOT NULL,
+  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 누구나 읽고 쓸 수 있도록 RLS 설정 (단축어는 인증 없이 POST를 보내므로 Public 허용 필요)
+ALTER TABLE shared_texts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can insert shared texts"
+ON shared_texts FOR INSERT
+WITH CHECK (true);
+
+CREATE POLICY "Public can view shared texts"
+ON shared_texts FOR SELECT
+USING (true);

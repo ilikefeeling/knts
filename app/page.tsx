@@ -7,6 +7,7 @@ import InstallPrompt from "@/components/InstallPrompt";
 import ExcelUploader from "@/components/ExcelUploader";
 import SmsComposer from "@/components/SmsComposer";
 import { getTodayVisitList, type LedgerRecord } from "@/lib/ledgerDB";
+import { isBusinessDay } from "korean-holidays";
 
 export default function Home() {
   const router = useRouter();
@@ -16,10 +17,32 @@ export default function Home() {
   const [testText, setTestText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [smsTarget, setSmsTarget] = useState<LedgerRecord | null>(null);
+  const [todayStr, setTodayStr] = useState("");
+  const [isHolidayToday, setIsHolidayToday] = useState(false);
 
   const loadVisits = useCallback(async () => {
     try {
-      const list = await getTodayVisitList();
+      let targetDate = new Date();
+      if (!isBusinessDay(targetDate)) {
+        setIsHolidayToday(true);
+        while (!isBusinessDay(targetDate)) {
+          targetDate.setDate(targetDate.getDate() + 1);
+        }
+      } else {
+        setIsHolidayToday(false);
+      }
+
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+      const dayOfWeek = days[targetDate.getDay()];
+      
+      if (!isBusinessDay(new Date())) {
+        setTodayStr(`[다음 근무일] ${targetDate.getFullYear()}년 ${targetDate.getMonth() + 1}월 ${targetDate.getDate()}일 (${dayOfWeek}) `);
+      } else {
+        setTodayStr(`${targetDate.getFullYear()}년 ${targetDate.getMonth() + 1}월 ${targetDate.getDate()}일 (${dayOfWeek}) `);
+      }
+
+      const targetDateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+      const list = await getTodayVisitList(targetDateStr);
       setVisits(list);
     } catch (err) {
       console.error("방문명단 로드 실패:", err);
@@ -59,15 +82,17 @@ export default function Home() {
 
   return (
     <div>
-      <h1>Field-Master (knts)</h1>
-      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
-        국세외수입 체납관리단 실태확인원을 위한 방문 작업 관리 도구
+      <h1 style={{ marginBottom: "0.5rem" }}>
+        FM
+      </h1>
+      <p style={{ color: "var(--color-text)", fontSize: "18px", fontWeight: "700", fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif", letterSpacing: "-0.5px", wordBreak: "keep-all", marginBottom: "1.5rem" }}>
+        국세외수입 체납관리단 실태확인원 업무 관리 도구
       </p>
 
       <InstallPrompt />
 
       {/* ── 엑셀 업로드 ── */}
-      <ExcelUploader onComplete={loadVisits} />
+      <ExcelUploader onComplete={loadVisits} hasVisits={visits.length > 0} />
       <a
         href="/templates/visit-list-template.xlsx"
         download="방문명단_샘플양식.xlsx"
@@ -93,23 +118,23 @@ export default function Home() {
 
       {/* ── 바로가기 ── */}
       <div className="home-links">
-        <Link href="/ledger" className="home-link-btn">
-          📋 방문 관리
+        <Link href="/ledger" className="home-link-btn btn-visit">
+          방문 관리
         </Link>
-        <Link href="/pricing" className="home-link-btn">
-          ✨ 요금제
+        <Link href="/guide" className="home-link-btn btn-guide">
+          사용 설명
         </Link>
-        <Link href="/guide" className="home-link-btn">
-          📖 사용 가이드
+        <Link href="/pricing" className="home-link-btn btn-pricing">
+          요금제
         </Link>
-        <Link href="/ios-guide" className="home-link-btn">
-          🍎 iOS 안내
+        <Link href="/ios-guide" className="home-link-btn btn-ios">
+          iPhone
         </Link>
       </div>
 
       {/* ── 오늘의 방문 명단 ── */}
       <div className="section-title">
-        <h2>오늘의 방문 명단</h2>
+        <h2>{todayStr}오늘의 방문 명단</h2>
         {visits.length > 0 && (
           <span className="section-count">{visits.length}건</span>
         )}
@@ -122,9 +147,13 @@ export default function Home() {
         </div>
       ) : visits.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">📋</div>
+          <div className="empty-state-icon">{isHolidayToday ? "🏖️" : "📋"}</div>
           <p className="empty-state-text">
-            오늘 예정된 방문이 없습니다.<br />
+            {isHolidayToday ? (
+              <>주말 및 공휴일에는 방문 명단이 생성되지 않습니다.<br />다음 근무일에도 예정된 방문이 없습니다.<br /></>
+            ) : (
+              <>오늘 예정된 방문이 없습니다.<br /></>
+            )}
             엑셀 명단을 업로드하거나,<br />
             방문 관리에서 방문 예정일을 설정해주세요.
           </p>
@@ -179,7 +208,10 @@ export default function Home() {
       <div className="card card-muted">
         <ol style={{ margin: 0, paddingLeft: "1.2rem", fontSize: 15 }}>
           <li style={{ marginBottom: 8 }}>
-            방명 명단에서 대상을 선택 후 <strong>클로바노트 앱 실행하기(현장 사진찍기)</strong>를 누릅니다.
+            <strong>➕ 엑셀 명단 추가하기</strong>를 눌러 방문할 명단을 업로드합니다. (잘못 올린 경우 <strong>🗑️ 잘못 올린 파일 삭제</strong>로 초기화 가능)
+          </li>
+          <li style={{ marginBottom: 8 }}>
+            방문 명단에서 대상을 선택 후 <strong>클로바노트 앱 실행하기(현장 사진찍기)</strong>를 누릅니다.
           </li>
           <li style={{ marginBottom: 8 }}>
             현장에서 필요한 사진을 촬영하고, 클로바노트에서 상담 내용을 녹음 및 텍스트로 변환합니다.

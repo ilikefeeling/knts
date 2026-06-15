@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveShareText, getShareText } from "@/lib/shareStore";
+import { createClient } from "@/utils/supabase/server";
 
 // iOS 단축어(Shortcuts) 2차 구현 시 사용:
 // 1) 단축어가 텍스트를 이 엔드포인트로 POST -> { id } 응답
@@ -20,7 +20,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "text가 비어 있습니다." }, { status: 400 });
   }
 
-  const id = saveShareText(text.trim());
+  const supabase = await createClient();
+  const id = Math.random().toString(36).slice(2, 10);
+
+  const { error } = await supabase
+    .from("shared_texts")
+    .insert({ id, text: text.trim() });
+
+  if (error) {
+    console.error("Failed to save shared text:", error);
+    return NextResponse.json({ error: "저장에 실패했습니다." }, { status: 500 });
+  }
+
   return NextResponse.json({ id });
 }
 
@@ -30,13 +41,30 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "id 파라미터가 필요합니다." }, { status: 400 });
   }
 
-  const text = getShareText(id);
-  if (text === null) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shared_texts")
+    .select("text, createdAt")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
     return NextResponse.json(
       { error: "만료되었거나 존재하지 않는 항목입니다." },
       { status: 404 }
     );
   }
 
-  return NextResponse.json({ text });
+  // 1시간 TTL 체크
+  const createdAtMs = new Date(data.createdAt).getTime();
+  if (Date.now() - createdAtMs > 60 * 60 * 1000) {
+    // 만료된 항목은 삭제
+    await supabase.from("shared_texts").delete().eq("id", id);
+    return NextResponse.json(
+      { error: "만료되었거나 존재하지 않는 항목입니다." },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({ text: data.text });
 }

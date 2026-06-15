@@ -2,22 +2,33 @@
 
 import { useState, useRef } from "react";
 import * as XLSX from "xlsx";
-import { upsertFromExcel, type ExcelRow } from "@/lib/ledgerDB";
+import { upsertFromExcel, deleteListForDate, type ExcelRow } from "@/lib/ledgerDB";
 import { addLog } from "@/lib/auditLog";
 
 type UploadState = "idle" | "preview" | "uploading" | "done";
 
 type Props = {
   onComplete?: () => void; // 업로드 완료 후 홈 방문명단 새로고침용
+  hasVisits?: boolean; // 현재 방문 명단이 있는지 여부
 };
 
-export default function ExcelUploader({ onComplete }: Props) {
+export default function ExcelUploader({ onComplete, hasVisits }: Props) {
   const [state, setState] = useState<UploadState>("idle");
   const [rows, setRows] = useState<ExcelRow[]>([]);
   const [fileName, setFileName] = useState("");
-  const [result, setResult] = useState<{ created: number; updated: number } | null>(null);
+  const [result, setResult] = useState<{ created: number; updated: number; deleted?: number } | null>(null);
+  const [isOverwrite, setIsOverwrite] = useState(true);
   const [visitDate, setVisitDate] = useState(() => {
-    const d = new Date();
+    let d = new Date();
+    // 만약 클라이언트에서 아직 모듈 로드 전이거나 SSR 에러 방지를 위해 간단히 처리
+    try {
+      const { isBusinessDay } = require("korean-holidays");
+      while (!isBusinessDay(d)) {
+        d.setDate(d.getDate() + 1);
+      }
+    } catch (e) {
+      // fallback
+    }
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   });
   const fileRef = useRef<HTMLInputElement>(null);
@@ -40,20 +51,20 @@ export default function ExcelUploader({ onComplete }: Props) {
         const r = json[i] as unknown as unknown[];
         if (!r || r.length < 3) continue;
 
-        const name = String(r[1] || "").trim();
-        const address = String(r[3] || "").trim();
+        const name = String(r[1] || "").trim(); // 성 명
+        const address = String(r[4] || "").trim(); // 주 소
         if (!name || !address) continue; // 성명·주소 없으면 건너뜀
 
         // 첫 행이 헤더("성명", "연번" 등)인 경우 건너뜀
-        if (i === 0 && (name === "성명" || name === "이름" || String(r[0]).trim() === "연번" || String(r[0]).trim() === "번호")) continue;
+        if (i === 0 && (name.includes("성명") || name.includes("성 명") || name.includes("이름") || String(r[0]).replace(/\s/g, "").includes("연번"))) continue;
 
         dataRows.push({
           name,
-          contact: String(r[2] || "").trim(),
+          contact: String(r[5] || "").trim(), // 연락처
           address,
-          debtAmount: String(r[4] || "").trim(),
-          debtPeriod: String(r[5] || "").trim(),
-          notes: String(r[6] || "").trim(),
+          debtAmount: String(r[3] || "").trim(), // 채무액
+          debtPeriod: "", // 체납기간은 원장에 없음
+          notes: String(r[10] || "").trim(), // 비고
         });
       }
       setRows(dataRows);
@@ -65,7 +76,7 @@ export default function ExcelUploader({ onComplete }: Props) {
   const handleUpload = async () => {
     setState("uploading");
     try {
-      const res = await upsertFromExcel(rows, visitDate);
+      const res = await upsertFromExcel(rows, visitDate, isOverwrite);
 
       // 각 건에 대해 Audit Log 생성
       for (const { record, isNew } of res.records) {
@@ -80,7 +91,7 @@ export default function ExcelUploader({ onComplete }: Props) {
         });
       }
 
-      setResult({ created: res.created, updated: res.updated });
+      setResult({ created: res.created, updated: res.updated, deleted: res.deleted });
       setState("done");
       onComplete?.();
     } catch (err) {
@@ -98,20 +109,54 @@ export default function ExcelUploader({ onComplete }: Props) {
     if (fileRef.current) fileRef.current.value = "";
   };
 
+  const handleDeleteWrongUpload = async () => {
+    if (!confirm("오늘 업로드된 명단을 삭제하시겠습니까?\n(과거 방문 이력이 있는 분들은 오늘 방문 일정만 취소됩니다.)")) return;
+    
+    setState("uploading");
+    try {
+      const res = await deleteListForDate(visitDate);
+      alert(`명단 삭제가 완료되었습니다.\n(완전 삭제: ${res.deleted}건, 방문 일정 취소: ${res.canceled}건)`);
+      reset();
+      onComplete?.();
+    } catch (e) {
+      console.error(e);
+      alert("삭제 중 오류가 발생했습니다.");
+      setState("idle");
+    }
+  };
+
   return (
     <div className="excel-uploader">
       {state === "idle" && (
-        <div className="excel-upload-trigger">
-          <label className="excel-upload-btn">
-            📂 엑셀 명단 업로드
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              onChange={handleFile}
-              style={{ display: "none" }}
-            />
-          </label>
+        <div className="excel-upload-trigger" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {!hasVisits && (
+            <label 
+              className="excel-upload-btn" 
+              style={{ width: '100%' }}
+              onClick={() => setIsOverwrite(false)}
+            >
+              ➕ 엑셀 명단 추가하기
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFile}
+                style={{ display: "none" }}
+              />
+            </label>
+          )}
+          
+          {hasVisits && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                className="excel-upload-btn" 
+                style={{ width: '100%', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', cursor: 'pointer', padding: '12px', borderRadius: '6px', fontSize: '1rem', fontWeight: 600, textAlign: 'center' }}
+                onClick={handleDeleteWrongUpload}
+              >
+                🗑️ 잘못 올린 파일 삭제
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -130,6 +175,8 @@ export default function ExcelUploader({ onComplete }: Props) {
               onChange={(e) => setVisitDate(e.target.value)}
             />
           </div>
+
+
 
           <div className="excel-table-wrap">
             <table className="excel-table">
@@ -186,6 +233,11 @@ export default function ExcelUploader({ onComplete }: Props) {
             신규 <strong>{result.created}</strong>건 추가, 기존{" "}
             <strong>{result.updated}</strong>건 업데이트
           </p>
+          {result.deleted !== undefined && result.deleted > 0 && (
+            <p style={{ marginTop: '4px', fontSize: '0.9rem', color: '#dc2626' }}>
+              🗑️ 잘못된 명단 <strong>{result.deleted}</strong>건 삭제/정리 완료
+            </p>
+          )}
           <button className="btn-primary" onClick={reset}>확인</button>
         </div>
       )}

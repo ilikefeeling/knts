@@ -1,7 +1,7 @@
 {
   "name": "Field-Master (knts) - 방문 작업 관리",
   "short_name": "Field-Master",
-  "description": "국세외수입 체납관리단 실태확인원을 위한 방문 작업 관리 도구",
+  "description": "국세외수입 체납관리단 실태확인원 업무 관리 도구",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -204,7 +204,7 @@ export default function GuidePage() {
         </Step>
         <Step num={3}>
           <p>
-            작성이 끝나면 홈 화면의 <strong>&quot;📂 엑셀 명단 업로드&quot;</strong>를
+            작성이 끝나면 홈 화면의 <strong>&quot;➕ 엑셀 명단 추가하기&quot;</strong>를
             눌러 파일을 선택하세요. 화면에 미리보기 표가 나타납니다.
           </p>
         </Step>
@@ -215,10 +215,16 @@ export default function GuidePage() {
             &quot;신규 ○건 추가, 기존 ○건 업데이트&quot; 결과가 표시됩니다.
           </p>
         </Step>
+        <Step num={5}>
+          <p>
+            만약 파일을 잘못 올렸다면, <strong>&quot;🗑️ 잘못 올린 파일 삭제&quot;</strong> 버튼을 눌러
+            해당 일자의 명단을 초기화하고 새 파일을 다시 올릴 수 있습니다.
+          </p>
+        </Step>
 
         <div className="guide-tip">
-          같은 이름+주소의 대상자가 이미 있으면 자동으로 기존 정보를
-          업데이트합니다. 중복 걱정 없이 업로드하셔도 됩니다.
+          같은 이름+주소의 대상자가 이미 있으면 자동으로 기존 정보를 업데이트합니다.<br />
+          명단을 추가로 더 올리고 싶을 때도 <strong>&quot;➕ 엑셀 명단 추가하기&quot;</strong>를 눌러 이어서 올릴 수 있습니다.
         </div>
       </Section>
 
