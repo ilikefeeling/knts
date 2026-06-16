@@ -211,7 +211,7 @@ export default function IosGuidePage() {
 
       <Step no={3} title="동작 추가 2: 나만의 개인 URL 구성하기">
         <p style={{ marginBottom: "16px", wordBreak: "keep-all" }}>
-          다시 <strong>화면 맨 아래 검색창</strong>에서 <strong>"URL"</strong>(단어만)을 검색하여 <strong>지구본 모양 아이콘</strong>이 있는 항목을 추가합니다. 그리고 입력칸에 아래 주소를 복사하여 붙여넣습니다.
+          다시 <strong>화면 맨 아래 검색창</strong>에서 <strong>"URL"</strong>(단어만)을 검색하여 <strong>지구본 모양 아이콘</strong>이 있는 항목을 추가합니다.
         </p>
 
         <div style={{ padding: "16px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #dee2e6", marginBottom: "16px", wordBreak: "break-all" }}>
@@ -219,36 +219,37 @@ export default function IosGuidePage() {
           <code style={{ display: "block", padding: "8px", backgroundColor: "#e9ecef", borderRadius: "4px", marginBottom: "8px", userSelect: "all" }}>
             {fullUrl}
           </code>
-          <button className="btn btn-primary" onClick={handleCopy} style={{ padding: "8px 16px", fontSize: "14px" }}>
+          <button className="btn btn-primary" onClick={handleCopy} style={{ padding: "8px 16px", fontSize: "14px", width: "100%" }}>
             {copied ? "✅ 복사 완료!" : "주소 복사하기"}
           </button>
         </div>
 
         <div style={{ padding: "16px", backgroundColor: "#fff3cd", color: "#856404", borderRadius: "8px", fontSize: 14, border: "1px solid #ffeeba", marginBottom: "16px" }}>
-          ⚠️ <strong>입력 시 주의사항</strong><br/>
-          <ul style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}>
-            <li style={{ marginBottom: "6px" }}>복사한 주소를 URL 입력칸에 붙여넣습니다.</li>
-            <li>
-              주소의 맨 끝부분에는 직접 타이핑하지 말고, 키보드 위쪽 변수 목록에서 <strong>[ 클립보드 ] 버튼</strong>을 터치하여 파란색 배지 모양으로 삽입해 주세요.
-            </li>
-          </ul>
+          ⚠️ <strong>입력 플로우 따라하기</strong><br/>
+          <ol style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}>
+            <li style={{ marginBottom: "6px" }}>현재 <strong>FM 앱(가이드 화면)으로 돌아와서</strong> 위의 [주소 복사하기] 버튼을 누릅니다.</li>
+            <li style={{ marginBottom: "6px" }}>다시 <strong>단축어 앱으로 돌아가서</strong> 추가된 URL 입력칸에 주소를 붙여넣습니다.</li>
+            <li>주소 맨 끝에 커서를 두고, 키보드 위쪽 변수 목록에서 <strong>[클립보드]</strong>를 터치하여 변수를 삽입합니다.</li>
+          </ol>
         </div>
       </Step>
 
       <Step no={4} title="동작 추가 3: URL 콘텐츠 가져오기">
-        <p style={{ marginBottom: "16px" }}>
-          이번에는 <strong>화면 맨 아래 검색창</strong>에서 <strong>"콘텐츠"</strong>를 검색하여 <strong>"URL 콘텐츠 가져오기"</strong> 동작을 추가합니다.
-        </p>
-        <div style={{ padding: "12px 16px", backgroundColor: "#e3f2fd", color: "#0d47a1", borderRadius: "8px", fontSize: 14 }}>
-          💡 <strong>핵심!</strong> 이 동작이 백그라운드에서 데이터를 몰래 전송하여 Safari가 켜지지 않게 만들어 줍니다. 기존의 "URL 열기"는 지워주세요!
+        <ol style={{ margin: "0", paddingLeft: "1.2rem", fontSize: 15, lineHeight: 1.6 }}>
+          <li style={{ marginBottom: "8px" }}>화면 맨 아래 검색창 우측에 있는 <strong>[ X ]</strong>를 터치하여 이전 검색어("URL")를 지워줍니다.</li>
+          <li style={{ marginBottom: "8px" }}>새롭게 <strong>"URL 콘텐츠 가져오기"</strong>를 검색하고 선택하여 추가합니다.</li>
+        </ol>
+        <div style={{ padding: "12px 16px", backgroundColor: "#e3f2fd", color: "#0d47a1", borderRadius: "8px", fontSize: 14, marginTop: "12px" }}>
+          💡 <strong>핵심!</strong> 이 동작이 Safari를 켜지 않고 백그라운드에서 데이터를 몰래 전송해 줍니다.
         </div>
       </Step>
 
-      <Step no={5} title="동작 추가 4: 성공 알림 표시 (선택사항)">
-        <p style={{ marginBottom: "16px" }}>
-          전송이 잘 되었는지 확인하기 위해 <strong>"알림"</strong>을 검색하여 <strong>"알림 보기"</strong> 동작을 추가합니다.<br/>
-          문구에는 "✅ Field Master에 전송되었습니다" 라고 적어주세요.
-        </p>
+      <Step no={5} title="동작 추가 4: 알림 보기 및 테스트 실행">
+        <ol style={{ margin: "0", paddingLeft: "1.2rem", fontSize: 15, lineHeight: 1.6 }}>
+          <li style={{ marginBottom: "8px" }}>검색창의 [ X ]를 누른 뒤 <strong>"알림"</strong>을 검색하여 <strong>"알림 보기"</strong>를 추가합니다. 문구는 "✅ 전송 성공" 등으로 적어줍니다.</li>
+          <li style={{ marginBottom: "8px" }}>화면 <strong>우측 하단의 삼각형(▶️) 버튼</strong>을 터치하여 단축어가 정상적으로 실행되는지 테스트합니다.</li>
+          <li style={{ marginBottom: "8px" }}>문제가 없다면 단축어 설정을 완료하고, 공유(내보내기) 버튼을 눌러 <strong>홈 화면에 추가</strong>를 선택한 뒤 이름을 <strong>"FM"</strong>으로 설정합니다.</li>
+        </ol>
         
         <div style={{ textAlign: "center", marginBottom: "8px", fontSize: "18px", color: "#333", fontWeight: "bold", marginTop: 32 }}>
           ✨ 최종 완성된 단축어 아이폰 화면 예시 ✨

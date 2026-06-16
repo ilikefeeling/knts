@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import RegisterSW from "@/components/RegisterSW";
 import NavBar from "@/components/NavBar";
+import InAppBrowserGuard from "@/components/InAppBrowserGuard";
 
 export const metadata: Metadata = {
   title: "FM(Field-Master)",
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
+        <InAppBrowserGuard />
         <RegisterSW />
         <div className="app-container">
           <NavBar />
@@ -37,4 +39,3 @@ export default function RootLayout({
     </html>
   );
 }
-
