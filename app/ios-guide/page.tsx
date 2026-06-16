@@ -246,7 +246,7 @@ export default function IosGuidePage() {
 
       <Step no={5} title="동작 추가 4: 알림 보기 및 테스트 실행">
         <ol style={{ margin: "0", paddingLeft: "1.2rem", fontSize: 15, lineHeight: 1.6 }}>
-          <li style={{ marginBottom: "8px" }}>검색창의 [ X ]를 누른 뒤 <strong>"알림"</strong>을 검색하여 <strong>"알림 보기"</strong>를 추가합니다. 문구는 "✅ 전송 성공" 등으로 적어줍니다.</li>
+          <li style={{ marginBottom: "8px" }}>검색창의 [ X ]를 누른 뒤 <strong>"알림"</strong>을 검색하여 <strong>"알림 보기"</strong>를 추가합니다. 문구는 <strong style={{color: "var(--color-primary)"}}>"✅ 전송 완료! 진짜 FM 앱을 열어 확인하세요"</strong> 등으로 적어줍니다.</li>
           <li style={{ marginBottom: "8px" }}>화면 <strong>우측 하단의 삼각형(▶️) 버튼</strong>을 터치하여 단축어가 정상적으로 실행되는지 테스트합니다.</li>
         </ol>
         <div style={{ padding: "12px 16px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #dee2e6", fontSize: 14, marginTop: "12px", wordBreak: "keep-all" }}>
@@ -260,7 +260,7 @@ export default function IosGuidePage() {
         <ol style={{ margin: "0", paddingLeft: "1.2rem", fontSize: 15, lineHeight: 1.6 }}>
           <li style={{ marginBottom: "8px" }}>화면 하단 가운데의 <strong>공유(내보내기) 버튼</strong>(위로 향한 화살표가 있는 네모 📤)을 터치합니다.</li>
           <li style={{ marginBottom: "8px" }}>메뉴에서 <strong>[홈 화면에 추가]</strong>를 선택합니다.</li>
-          <li style={{ marginBottom: "8px" }}>이름을 <strong>"FM"</strong>으로 설정하고 우측 상단의 <strong>추가</strong>를 누르면 완벽하게 끝납니다!</li>
+          <li style={{ marginBottom: "8px" }}>이름을 <strong>"FM전송"</strong>(또는 원하시는 이름)으로 설정하고 우측 상단의 <strong>추가</strong>를 누르면 완벽하게 끝납니다!</li>
         </ol>
         
         <div style={{ textAlign: "center", marginBottom: "8px", fontSize: "18px", color: "#333", fontWeight: "bold", marginTop: 32 }}>
@@ -279,11 +279,13 @@ export default function IosGuidePage() {
         <div style={{ padding: "20px", backgroundColor: "var(--color-bg)", borderRadius: "8px", border: "1px solid var(--color-border)", fontSize: "16px" }}>
           <div style={{ marginBottom: 16 }}><strong>1.</strong> 클로바노트에서 기록된 텍스트 전체를 <strong>[ 복사 ]</strong> 합니다.</div>
           <div style={{ textAlign: "center", color: "var(--color-primary)", marginBottom: 16, fontSize: "24px" }}>⬇</div>
-          <div style={{ marginBottom: 16 }}><strong>2.</strong> 단축어를 실행합니다. (홈 화면 아이콘 클릭 또는 공유 시트에서 실행)</div>
+          <div style={{ marginBottom: 16 }}><strong>2.</strong> 방금 만드신 <strong>단축어 전송 리모컨</strong>을 한 번 터치합니다.</div>
           <div style={{ textAlign: "center", color: "var(--color-primary)", marginBottom: 16, fontSize: "24px" }}>⬇</div>
-          <div style={{ marginBottom: 16 }}><strong>3.</strong> "전송되었습니다" 알림이 뜨면 성공입니다.</div>
+          <div style={{ marginBottom: 16 }}><strong>3.</strong> "전송 완료!" 알림이 뜨면 전송이 끝난 것입니다.</div>
           <div style={{ textAlign: "center", color: "var(--color-primary)", marginBottom: 16, fontSize: "24px" }}>⬇</div>
-          <div><strong>4.</strong> 나중에 여유로울 때 <strong>Field Master 앱(PWA)</strong>을 열면, 미정리된 상담 내용들이 수신함(Inbox)에 쌓여 있습니다! 🚀</div>
+          <div style={{ backgroundColor: "#e3f2fd", padding: "12px", borderRadius: "8px" }}>
+            <strong>4.</strong> 내용 정리가 필요할 때 <strong>"진짜 Field Master 앱"</strong>(로그인 된 화면)을 열어보세요. 수신함(Inbox)에 아까 보낸 내용들이 쌓여 있습니다! 🚀
+          </div>
         </div>
       </div>
 
