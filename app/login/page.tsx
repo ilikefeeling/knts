@@ -12,13 +12,24 @@ export default function LoginPage() {
     const supabase = createClient()
     
     // Auth URL parameters to configure Kakao OAuth
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: 'profile_nickname profile_image',
-      },
-    })
+      const getURL = () => {
+        let url =
+          process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to https://www.caretrend.co.kr in production
+          process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+          window.location.origin // Fallback for localhost
+        
+        // Make sure to include `https://` when not localhost.
+        url = url.startsWith('http') ? url : `https://${url}`
+        return url
+      }
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: `${getURL()}/auth/callback`,
+          scopes: 'profile_nickname profile_image',
+        },
+      })
 
     if (error) {
       console.error("Login error:", error.message)
@@ -67,6 +78,20 @@ export default function LoginPage() {
         </svg>
         {isLoading ? "연결 중..." : "카카오로 시작하기"}
       </button>
+
+      <p style={{ 
+        marginTop: '1.5rem', 
+        fontSize: '13px', 
+        color: 'var(--color-text-muted)', 
+        textAlign: 'center', 
+        lineHeight: '1.5',
+        backgroundColor: 'rgba(0,0,0,0.03)',
+        padding: '12px 20px',
+        borderRadius: '8px'
+      }}>
+        ℹ️ 카카오로 로그인하신 후<br/>
+        <strong>현장관리 시스템을 앱으로 설치</strong>하실 수 있습니다.
+      </p>
     </div>
   )
 }
