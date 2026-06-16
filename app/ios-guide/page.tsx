@@ -55,8 +55,8 @@ function IosShortcutsMockup({ fullUrl }: { fullUrl: string }) {
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", flex: 1 }}>
               <div style={{ width: "30px", height: "30px", borderRadius: "6px", backgroundColor: "#e5f0ff", color: "#007aff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0, transform: "rotate(45deg)" }}>🔗</div>
-              <div suppressHydrationWarning style={{ fontSize: "15px", color: "#007aff", wordBreak: "break-all", lineHeight: 1.4, marginTop: "4px" }}>
-                {fullUrl}
+              <div style={{ fontSize: "15px", color: "#007aff", wordBreak: "break-all", lineHeight: 1.4, marginTop: "4px" }}>
+                <span suppressHydrationWarning>{fullUrl}</span>
                 <span style={{ backgroundColor: "#e5f0ff", color: "#007aff", padding: "2px 8px", borderRadius: "6px", marginLeft: "4px", display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "14px" }}>
                   <span style={{ fontSize: "12px" }}>📋</span> 클립보드
                 </span>
@@ -217,7 +217,7 @@ export default function IosGuidePage() {
         <div style={{ padding: "16px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #dee2e6", marginBottom: "16px", wordBreak: "break-all" }}>
           <strong style={{ display: "block", marginBottom: 8, color: "var(--color-primary)" }}>나의 고유 전송 주소:</strong>
           <code style={{ display: "block", padding: "8px", backgroundColor: "#e9ecef", borderRadius: "4px", marginBottom: "8px", userSelect: "all" }}>
-            {fullUrl}
+            <span suppressHydrationWarning>{fullUrl}</span>
           </code>
           <button className="btn btn-primary" onClick={handleCopy} style={{ padding: "8px 16px", fontSize: "14px", width: "100%" }}>
             {copied ? "✅ 복사 완료!" : "주소 복사하기"}
