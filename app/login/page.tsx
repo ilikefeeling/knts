@@ -79,19 +79,7 @@ export default function LoginPage() {
         {isLoading ? "연결 중..." : "카카오로 시작하기"}
       </button>
 
-      <p style={{ 
-        marginTop: '1.5rem', 
-        fontSize: '13px', 
-        color: 'var(--color-text-muted)', 
-        textAlign: 'center', 
-        lineHeight: '1.5',
-        backgroundColor: 'rgba(0,0,0,0.03)',
-        padding: '12px 20px',
-        borderRadius: '8px'
-      }}>
-        ℹ️ 카카오로 로그인하신 후<br/>
-        <strong>현장관리 시스템을 앱으로 설치</strong>하실 수 있습니다.
-      </p>
+
     </div>
   )
 }
