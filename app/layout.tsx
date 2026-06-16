@@ -4,7 +4,7 @@ import RegisterSW from "@/components/RegisterSW";
 import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
-  title: "Field-Master (knts)",
+  title: "FM(Field-Master)",
   description: "국세외수입 체납관리단 실태확인원 업무 관리 도구",
   manifest: "/manifest.json",
   icons: {

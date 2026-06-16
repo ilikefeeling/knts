@@ -19,6 +19,7 @@ export default function Home() {
   const [smsTarget, setSmsTarget] = useState<LedgerRecord | null>(null);
   const [todayStr, setTodayStr] = useState("");
   const [isHolidayToday, setIsHolidayToday] = useState(false);
+  const [pendingItems, setPendingItems] = useState<any[]>([]);
 
   const loadVisits = useCallback(async () => {
     try {
@@ -51,9 +52,22 @@ export default function Home() {
     }
   }, []);
 
+  const loadPendingItems = useCallback(async () => {
+    try {
+      const res = await fetch("/api/share/pending");
+      const data = await res.json();
+      if (data.pending) {
+        setPendingItems(data.pending);
+      }
+    } catch (err) {
+      console.error("미정리 항목 로드 실패:", err);
+    }
+  }, []);
+
   useEffect(() => {
     loadVisits();
-  }, [loadVisits]);
+    loadPendingItems();
+  }, [loadVisits, loadPendingItems]);
 
   async function handleTestSubmit() {
     if (!testText.trim() || !modalTarget) return;
@@ -90,6 +104,31 @@ export default function Home() {
       </p>
 
       <InstallPrompt />
+
+      {/* ── 백그라운드 수신함 배너 ── */}
+      {pendingItems.length > 0 && (
+        <div
+          className="card"
+          style={{
+            background: "var(--color-primary-bg)",
+            border: "1px solid var(--color-primary)",
+            marginBottom: "1rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px"
+          }}
+        >
+          <div style={{ fontWeight: 700, color: "var(--color-primary)" }}>
+            📥 클로바노트에서 전송된 미정리 상담 내용이 {pendingItems.length}건 있습니다.
+          </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => router.push(`/share-receiver?id=${pendingItems[0].id}`)}
+          >
+            정리하러 가기 →
+          </button>
+        </div>
+      )}
 
       {/* ── 엑셀 업로드 ── */}
       <ExcelUploader onComplete={loadVisits} hasVisits={visits.length > 0} />

@@ -68,3 +68,31 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ text: data.text });
 }
+
+export async function DELETE(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "id 파라미터가 필요합니다." }, { status: 400 });
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // 삭제 요청 시 본인의 텍스트이거나 user_id가 없는 텍스트만 삭제 가능
+  // (supabase_schema의 RLS 정책이 적용되지만, 명시적으로 필터 적용)
+  const { error } = await supabase
+    .from("shared_texts")
+    .delete()
+    .eq("id", id)
+    .or(`user_id.eq.${user.id},user_id.is.null`);
+
+  if (error) {
+    return NextResponse.json({ error: "삭제 실패" }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}

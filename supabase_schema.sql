@@ -62,17 +62,23 @@ WITH CHECK (
 -- 5. shared_texts 테이블 생성 (단축어 공유 데이터 임시 저장)
 CREATE TABLE shared_texts (
   id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
   text TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 누구나 읽고 쓸 수 있도록 RLS 설정 (단축어는 인증 없이 POST를 보내므로 Public 허용 필요)
+-- 누구나 생성할 수 있도록 하되, 본인 것만 조회/삭제할 수 있도록 RLS 설정
 ALTER TABLE shared_texts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public can insert shared texts"
 ON shared_texts FOR INSERT
 WITH CHECK (true);
 
-CREATE POLICY "Public can view shared texts"
+CREATE POLICY "Users can view their own shared texts"
 ON shared_texts FOR SELECT
-USING (true);
+USING (auth.uid() = user_id OR user_id IS NULL);
+
+CREATE POLICY "Users can delete their own shared texts"
+ON shared_texts FOR DELETE
+USING (auth.uid() = user_id OR user_id IS NULL);

@@ -205,6 +205,11 @@ function ShareReceiverInner() {
 
     setSaved(true);
 
+    // 4) 수신함(Pending)에서 삭제
+    if (id) {
+      await fetch(`/api/share?id=${id}`, { method: "DELETE" }).catch(() => {});
+    }
+
     // 업데이트된 레코드로 selectedTarget 갱신 (화면 표시용)
     if (updated) {
       setSelectedTarget(updated);
@@ -469,21 +474,24 @@ function ShareReceiverInner() {
           <div style={{ height: 16 }} />
 
           {saved ? (
-            <div
-              className="card"
-              style={{
-                background: "var(--color-success-bg)",
-                color: "var(--color-success)",
-                border: "none",
-                textAlign: "center",
-              }}
-            >
-              ✅ 저장되었습니다.
-              {result === "재방문필요" && revisitDate && (
-                <div style={{ fontSize: 14, marginTop: 4 }}>
-                  재방문 예약: {revisitDate} {revisitTime}
-                </div>
-              )}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div
+                className="card"
+                style={{
+                  background: "var(--color-success-bg)",
+                  color: "var(--color-success)",
+                  border: "none",
+                  textAlign: "center",
+                }}
+              >
+                ✅ 저장되었습니다.
+                {result === "재방문필요" && revisitDate && (
+                  <div style={{ fontSize: 14, marginTop: 4 }}>
+                    재방문 예약: {revisitDate} {revisitTime}
+                  </div>
+                )}
+              </div>
+              <a className="btn btn-primary" href="/">홈으로 돌아가기</a>
             </div>
           ) : (
             <button
