@@ -90,8 +90,8 @@ export default function InstallPrompt() {
           PC에서 보고 계시네요
         </p>
         <p style={{ fontSize: 15, color: "var(--color-text-muted)", margin: "0 0 8px" }}>
-          크롬 주소창 오른쪽의 설치 아이콘(⊕) 또는 오른쪽 위 메뉴(⋮) →
-          &quot;Field-Master 설치&quot;로 PC에도 설치할 수 있습니다.
+          ℹ️ 카카오로 로그인하신 후<br />
+          현장관리 시스템을 앱으로 설치하실 수 있습니다.
         </p>
         <p style={{ fontSize: 14, color: "var(--color-text-muted)", margin: 0 }}>
           ⚠️ 단, 클로바노트 &quot;공유&quot;로 현장기록을 보내는 기능은{" "}
