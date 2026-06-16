@@ -16,6 +16,9 @@ export default function InstallPrompt() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    // 이전 버전에 쓰이던 로컬스토리지 키 삭제 (설치 전에는 계속 보이도록 강제)
+    localStorage.removeItem("hideInstallPrompt");
+
     // PWA가 이미 설치되어 standalone 모드로 실행 중인지 감지
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -25,11 +28,6 @@ export default function InstallPrompt() {
     // 모바일 여부 판단 (Android/iOS UA 기준)
     setIsMobile(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
 
-    // 숨김 처리 여부 확인
-    if (localStorage.getItem("hideInstallPrompt") === "true") {
-      setHidden(true);
-    }
-
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -38,14 +36,8 @@ export default function InstallPrompt() {
 
     const installedHandler = () => {
       setInstalled(true);
-      localStorage.setItem("hideInstallPrompt", "true");
     };
     window.addEventListener("appinstalled", installedHandler);
-
-    // Safari 등에서 standalone 감지 추가 로직
-    if (standalone) {
-      localStorage.setItem("hideInstallPrompt", "true");
-    }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
@@ -54,8 +46,7 @@ export default function InstallPrompt() {
   }, []);
 
   const handleHide = () => {
-    localStorage.setItem("hideInstallPrompt", "true");
-    setHidden(true);
+    setHidden(true); // 현재 세션(화면)에서만 숨김 처리
   };
 
   // 이미 설치되어 standalone으로 실행 중이거나 숨김 처리했으면 배너 자체를 숨김

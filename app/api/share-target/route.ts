@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveShareText } from "@/lib/shareStore";
+import { createClient } from "@/utils/supabase/server";
 
 // 안드로이드 PWA Share Target (manifest.json의 share_target.action)
 // 클로바노트/삼성 녹음 등에서 "공유" 선택 시 이 엔드포인트로 POST 요청이 들어옴.
@@ -20,7 +20,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const id = saveShareText(sharedText);
+  const supabase = await createClient();
+  const id = Math.random().toString(36).slice(2, 10);
+
+  const { error } = await supabase
+    .from("shared_texts")
+    .insert({ id, text: sharedText });
+
+  if (error) {
+    console.error("Failed to save shared text:", error);
+    return NextResponse.redirect(
+      new URL("/share-receiver?error=save_failed", req.url),
+      303
+    );
+  }
 
   // 공유 후 사용자에게 보여줄 화면으로 리다이렉트 (303: POST -> GET)
   return NextResponse.redirect(

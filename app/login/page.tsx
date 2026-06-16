@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { createClient } from "@/utils/supabase/client"
+import InstallPrompt from "@/components/InstallPrompt"
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -28,7 +29,12 @@ export default function LoginPage() {
 
   return (
     <div className="app-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '2rem' }}>
+      <div style={{ width: '100%', maxWidth: '320px', marginBottom: '2rem' }}>
+        <InstallPrompt />
+      </div>
+
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', marginBottom: '0.25rem', fontWeight: 600 }}>국세청 국세외수입 체납관리단 실태확인원</p>
         <h1 style={{ fontSize: '32px', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>현장관리 시스템</h1>
         <p style={{ color: 'var(--color-text-muted)' }}>안전하고 체계적인 데이터 관리를 위해<br/>로그인이 필요합니다.</p>
       </div>

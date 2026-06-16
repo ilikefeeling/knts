@@ -39,7 +39,8 @@ export async function updateSession(request: NextRequest) {
   const isProtectedRoute = !request.nextUrl.pathname.startsWith('/login') && 
                            !request.nextUrl.pathname.startsWith('/auth') && 
                            !request.nextUrl.pathname.startsWith('/guide') && 
-                           !request.nextUrl.pathname.startsWith('/ios-guide')
+                           !request.nextUrl.pathname.startsWith('/ios-guide') &&
+                           !request.nextUrl.pathname.startsWith('/start')
 
   if (!user && isProtectedRoute) {
     // no user, potentially respond by redirecting the user to the login page
