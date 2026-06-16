@@ -249,6 +249,11 @@ export default function IosGuidePage() {
           <li style={{ marginBottom: "8px" }}>검색창의 [ X ]를 누른 뒤 <strong>"알림"</strong>을 검색하여 <strong>"알림 보기"</strong>를 추가합니다. 문구는 "✅ 전송 성공" 등으로 적어줍니다.</li>
           <li style={{ marginBottom: "8px" }}>화면 <strong>우측 하단의 삼각형(▶️) 버튼</strong>을 터치하여 단축어가 정상적으로 실행되는지 테스트합니다.</li>
         </ol>
+        <div style={{ padding: "12px 16px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #dee2e6", fontSize: 14, marginTop: "12px", wordBreak: "keep-all" }}>
+          💡 <strong>테스트 시 참고하세요!</strong><br/>
+          테스트 버튼(▶️)을 누른 후 화면 하단에 <code>{`{"success": true, "id": "..."}`}</code> 와 같은 영어 코드가 나타나더라도 <strong>절대 당황하지 마세요!</strong><br/>
+          이는 서버에서 <strong>"백그라운드 전송이 완벽하게 성공했습니다"</strong>라고 알려주는 100% 정상적인 컴퓨터 신호입니다. 로그인 창이나 다른 아이콘을 터치하실 필요가 전혀 없습니다.
+        </div>
       </Step>
 
       <Step no={6} title="마무리: 단축어를 홈 화면에 추가하기">
