@@ -38,6 +38,8 @@ export async function updateSession(request: NextRequest) {
   // 보호할 라우트 설정
   const isProtectedRoute = !request.nextUrl.pathname.startsWith('/login') && 
                            !request.nextUrl.pathname.startsWith('/auth') && 
+                           !request.nextUrl.pathname.startsWith('/api/auth') && 
+                           !request.nextUrl.pathname.startsWith('/api/share-target') && 
                            !request.nextUrl.pathname.startsWith('/guide') && 
                            !request.nextUrl.pathname.startsWith('/ios-guide') &&
                            !request.nextUrl.pathname.startsWith('/start')

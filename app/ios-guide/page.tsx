@@ -248,7 +248,14 @@ export default function IosGuidePage() {
         <ol style={{ margin: "0", paddingLeft: "1.2rem", fontSize: 15, lineHeight: 1.6 }}>
           <li style={{ marginBottom: "8px" }}>검색창의 [ X ]를 누른 뒤 <strong>"알림"</strong>을 검색하여 <strong>"알림 보기"</strong>를 추가합니다. 문구는 "✅ 전송 성공" 등으로 적어줍니다.</li>
           <li style={{ marginBottom: "8px" }}>화면 <strong>우측 하단의 삼각형(▶️) 버튼</strong>을 터치하여 단축어가 정상적으로 실행되는지 테스트합니다.</li>
-          <li style={{ marginBottom: "8px" }}>문제가 없다면 단축어 설정을 완료하고, 공유(내보내기) 버튼을 눌러 <strong>홈 화면에 추가</strong>를 선택한 뒤 이름을 <strong>"FM"</strong>으로 설정합니다.</li>
+        </ol>
+      </Step>
+
+      <Step no={6} title="마무리: 단축어를 홈 화면에 추가하기">
+        <ol style={{ margin: "0", paddingLeft: "1.2rem", fontSize: 15, lineHeight: 1.6 }}>
+          <li style={{ marginBottom: "8px" }}>화면 하단 가운데의 <strong>공유(내보내기) 버튼</strong>(위로 향한 화살표가 있는 네모 📤)을 터치합니다.</li>
+          <li style={{ marginBottom: "8px" }}>메뉴에서 <strong>[홈 화면에 추가]</strong>를 선택합니다.</li>
+          <li style={{ marginBottom: "8px" }}>이름을 <strong>"FM"</strong>으로 설정하고 우측 상단의 <strong>추가</strong>를 누르면 완벽하게 끝납니다!</li>
         </ol>
         
         <div style={{ textAlign: "center", marginBottom: "8px", fontSize: "18px", color: "#333", fontWeight: "bold", marginTop: 32 }}>
