@@ -21,17 +21,36 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const id = Math.random().toString(36).slice(2, 10);
+
+  const insertData: any = { id, text: text.trim() };
+  if (user) {
+    insertData.user_id = user.id;
+  }
+  
+  console.log(`[POST /api/share] Inserting ${id} with user_id: ${user?.id || 'null'}`);
 
   const { error } = await supabase
     .from("shared_texts")
-    .insert({ id, text: text.trim() });
+    .insert(insertData);
 
   if (error) {
     console.error("Failed to save shared text:", error);
     return NextResponse.json({ error: "저장에 실패했습니다." }, { status: 500 });
   }
 
+  // DEBUG: Immediate SELECT to check RLS visibility
+  const { data: testSelect, error: testSelectError } = await supabase
+    .from("shared_texts")
+    .select("*")
+    .eq("id", id)
+    .single();
+    
+  console.log(`[POST /api/share] Immediate SELECT after insert for ${id}:`, { testSelect, testSelectError });
+
+  console.log(`[POST /api/share] Successfully inserted ${id}`);
   return NextResponse.json({ id });
 }
 
@@ -42,31 +61,37 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = await createClient();
+  
+  // Force token resolution/refresh before querying the database
+  const { data: authData } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("shared_texts")
     .select("text, createdAt")
     .eq("id", id)
     .single();
 
-  if (error || !data) {
+  if (error && error.code !== 'PGRST116') {
+    console.error("GET /api/share DB Error:", error);
+    return NextResponse.json({ error: "데이터베이스 조회 오류가 발생했습니다." }, { status: 500 });
+  }
+
+  if (!data) {
+    console.error(`GET /api/share 404 Debug - id: ${id}, user_id: ${authData.user?.id}, error:`, error);
     return NextResponse.json(
-      { error: "만료되었거나 존재하지 않는 항목입니다." },
+      { error: "만료되었거나 존재하지 않는 항목입니다.", debug: { id, userId: authData.user?.id, dbError: error } },
       { status: 404 }
     );
   }
 
-  // 1시간 TTL 체크
-  const createdAtMs = new Date(data.createdAt).getTime();
-  if (Date.now() - createdAtMs > 60 * 60 * 1000) {
-    // 만료된 항목은 삭제
-    await supabase.from("shared_texts").delete().eq("id", id);
-    return NextResponse.json(
-      { error: "만료되었거나 존재하지 않는 항목입니다." },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json({ text: data.text });
+  // 사용자 기획에 따라 시간 경과에 따른 자동 만료/삭제(TTL) 로직을 제거했습니다.
+  // 사용자가 명시적으로 정리를 완료하거나 직접 삭제하기 전까지는 항상 보존됩니다.
+  
+  return NextResponse.json({
+    id: data.id,
+    text: data.text,
+    createdAt: data.createdAt,
+  });
 }
 
 export async function DELETE(req: NextRequest) {

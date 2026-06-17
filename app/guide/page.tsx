@@ -112,7 +112,7 @@ export default function GuidePage() {
           <p>
             <strong>[기록 공유 & 사진 등록]</strong><br />
             상담 종료 후, 클로바노트에서 텍스트로 변환하고 <strong>Field-Master로 공유</strong>합니다.<br />
-            앱이 열리면 대상자를 선택하고, <strong>[📸 현장 사진]</strong> 영역에서 아까 찍어둔 사진을 등록한 뒤 함께 저장합니다.
+            앱이 열리면 <strong>1:1 매칭된 대상자를 확인 후 선택</strong>하고, <strong>[📸 현장 사진]</strong> 영역에서 아까 찍어둔 사진을 등록한 뒤 함께 저장합니다.
           </p>
           <div style={{ marginTop: 4 }}>
             <a href="#section-5" style={{ color: "var(--color-primary)", fontSize: 14, textDecoration: "none" }}>자세히 ➔</a>
@@ -286,28 +286,23 @@ export default function GuidePage() {
       {/* ── 5장: AI 자동분류 ── */}
       <Section number={5} title="AI 자동분류 & 저장하기">
         <p style={{ fontSize: 16, lineHeight: 1.7, marginBottom: 16 }}>
-          클로바노트에서 공유하면 <strong>3단계</strong>를 거쳐 현장기록이
+          클로바노트에서 공유하면 <strong>2단계</strong>를 거쳐 현장기록이
           자동으로 정리·저장됩니다.
         </p>
 
         <Step num={1}>
           <p>
-            <strong>1단계 — 상담 내용 확인</strong><br />
-            공유받은 텍스트가 화면에 표시됩니다.
-            내용을 확인하고 <strong>&quot;다음&quot;</strong> 버튼을 누르세요.
+            <strong>1단계 — 1:1 자동 매칭 및 대상 확인</strong><br />
+            공유받은 텍스트와 함께 <strong>앱이 직전 방문 기록과 내용을 분석하여 찾아낸 최적의 방문 대상 1개</strong>가 화면에 제시됩니다.<br />
+            대상을 눈으로 확인하고 <strong>터치하여 선택</strong>한 뒤, 하단의 <strong>&quot;선택한 대상으로 자동 정리하기&quot;</strong>를 누르세요.
           </p>
+          <div className="guide-tip" style={{ marginTop: 8 }}>
+            앱이 찾은 대상이 틀렸다면, 아래의 <strong>&quot;목록에 찾는 대상이 없나요? 전체 명단 보기&quot;</strong> 버튼을 눌러 직접 고르실 수도 있습니다.
+          </div>
         </Step>
         <Step num={2}>
           <p>
-            <strong>2단계 — 방문 대상자 선택</strong><br />
-            오늘 방문 명단 중 해당 대상자를 <strong>터치하여 선택</strong>합니다.
-            선택하면 카드가 파란색으로 표시됩니다.
-            <strong> &quot;자동 정리하기&quot;</strong>를 누르세요.
-          </p>
-        </Step>
-        <Step num={3}>
-          <p>
-            <strong>3단계 — 결과 확인 & 저장</strong><br />
+            <strong>2단계 — AI 정리 결과 확인 & 저장</strong><br />
             AI가 상담 내용을 분석하여 <strong>방문결과</strong>와
             <strong> 특이사항</strong>을 자동으로 채워줍니다.
           </p>
@@ -328,16 +323,36 @@ export default function GuidePage() {
         </div>
 
         <div className="guide-warning">
-          <strong>주의:</strong> 저장하기 전에 뒤로 가기를 누르거나 새로고침하면 1단계부터 다시 시작해야 합니다.
-          2단계에서 대상을 다시 선택해 &quot;자동 정리하기&quot;를 누르면 AI 분석 한도가 1회 더 차감될 수 있으니 주의하세요.
+          <strong>주의:</strong> 저장하기 전에 뒤로 가기를 누르거나 새로고침하면 다시 진행해야 합니다.
+          다시 진입하여 1단계에서 &quot;자동 정리하기&quot;를 누르면 AI 분석 한도가 차감될 수 있으니 주의하세요.
         </div>
       </Section>
 
-      {/* ── 6장: 재방문 예약 ── */}
-      <Section number={6} title="재방문 예약하기">
+      {/* ── 6장: 미정리 상담 내용 ── */}
+      <Section number={6} title="미정리 상담 내용 (나중에 정리하기)">
         <Step num={1}>
           <p>
-            5장의 3단계에서 방문결과를 <strong>&quot;재방문필요&quot;</strong>로
+            현장에서 클로바노트로 공유했지만, 바빠서 저장을 마무리하지 못했거나 실수로 창을 닫아버린 경우 <strong>&quot;미정리 상담 내용&quot;</strong>으로 홈 화면에 안전하게 보관됩니다.
+          </p>
+        </Step>
+        <Step num={2}>
+          <p>
+            홈 화면 상단의 <strong>&quot;⚠️ 처리하지 않은 현장기록이 ○건 있습니다&quot;</strong> 알림바나, <strong>&quot;✨ 미정리 상담 (○건)&quot;</strong> 버튼을 누르면 보관된 목록을 볼 수 있습니다.
+          </p>
+        </Step>
+        <Step num={3}>
+          <p>
+            항목의 <strong>[정리하러 가기]</strong> 영역을 클릭하면 <strong>1:1 자동 매칭 화면</strong>으로 바로 연결되어 밀린 정리를 즉시 완료할 수 있습니다.<br />
+            만약 테스트로 보냈거나 더 이상 필요 없는 기록이라면, 항목 오른쪽의 <strong>&quot;🗑️ (휴지통)&quot;</strong> 아이콘을 눌러 즉각 삭제할 수 있습니다.
+          </p>
+        </Step>
+      </Section>
+
+      {/* ── 7장: 재방문 예약 ── */}
+      <Section number={7} title="재방문 예약하기">
+        <Step num={1}>
+          <p>
+            AI 정리 결과 화면(2단계)에서 방문결과를 <strong>&quot;재방문필요&quot;</strong>로
             선택하면, 아래에 <strong>📅 재방문 예약</strong> 영역이 나타납니다.
           </p>
         </Step>
@@ -357,8 +372,8 @@ export default function GuidePage() {
         </Step>
       </Section>
 
-      {/* ── 7장: 방문 관리 ── */}
-      <Section number={7} title="방문 관리 (원장) 사용하기">
+      {/* ── 8장: 방문 관리 ── */}
+      <Section number={8} title="방문 관리 (원장) 사용하기">
         <Step num={1}>
           <p>
             홈 화면에서 <strong>&quot;📋 방문 관리&quot;</strong> 버튼을 누르면
@@ -382,8 +397,8 @@ export default function GuidePage() {
         </Step>
       </Section>
 
-      {/* ── 8장: 문자 발송 ── */}
-      <Section number={8} title="문자 발송하기">
+      {/* ── 9장: 문자 발송 ── */}
+      <Section number={9} title="문자 발송하기">
         <Step num={1}>
           <p>
             홈 화면의 방문 카드 오른쪽에 있는 <strong>📱 버튼</strong>을
@@ -404,8 +419,8 @@ export default function GuidePage() {
         </div>
       </Section>
 
-      {/* ── 9장: 요금제 ── */}
-      <Section number={9} title="요금제 & AI 사용 한도">
+      {/* ── 10장: 요금제 ── */}
+      <Section number={10} title="요금제 & AI 사용 한도">
         <p style={{ fontSize: 16, lineHeight: 1.7, marginBottom: 16 }}>
           엑셀 업로드, 원장 관리, 문자 발송은 <strong>모두 무료</strong>입니다.
           AI 자동분류 기능만 아래와 같이 한도가 있습니다.
@@ -435,8 +450,8 @@ export default function GuidePage() {
         </div>
       </Section>
 
-      {/* ── 10장: FAQ ── */}
-      <Section number={10} title="자주 묻는 질문 (FAQ)">
+      {/* ── 11장: FAQ ── */}
+      <Section number={11} title="자주 묻는 질문 (FAQ)">
         <div className="guide-faq-item">
           <p className="guide-faq-q">
             Q. 클로바노트에서 &quot;공유&quot;를 눌러도 Field-Master가 안 보여요
@@ -506,12 +521,10 @@ export default function GuidePage() {
 
         <div className="guide-faq-item">
           <p className="guide-faq-q">
-            Q. 3단계 저장 전에 실수로 나갔는데 어떻게 하나요?
+            Q. 2단계 저장 전에 실수로 나갔는데 어떻게 하나요?
           </p>
           <p className="guide-faq-a">
-            스마트폰의 &apos;최근 앱 보기&apos;를 통해 브라우저를 다시 켜시면 3단계가 유지되어 있습니다.
-            하지만 실수로 &apos;새로고침&apos;이나 &apos;뒤로 가기&apos;를 누르셨다면 진행 상태가 초기화되어 1단계부터 다시 하셔야 합니다.
-            이때 AI 자동분류를 다시 요청하면 무료 횟수 한도(15건)가 1건 더 차감될 수 있습니다.
+            걱정하지 마세요! 스마트폰에서 실수로 창을 닫았거나 뒤로 가기를 눌렀더라도, 데이터는 날아가지 않습니다. 홈 화면으로 가시면 <strong>&quot;미정리 상담 내용&quot;</strong>에 안전하게 보관되어 있습니다. 목록에서 다시 클릭하여 언제든 정리를 이어서 진행할 수 있습니다.
           </p>
         </div>
       </Section>

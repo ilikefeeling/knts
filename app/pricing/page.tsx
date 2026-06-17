@@ -74,11 +74,15 @@ export default function PricingPage() {
 
       <div className="card card-muted">
         <p style={{ marginBottom: 8, fontSize: 14, color: "var(--color-text-muted)" }}>
-          ⚠️ 결제 연동 전 테스트용 버튼입니다. 실제 서비스에서는 결제 완료 시
-          자동으로 Pro 전환됩니다.
+          ⚠️ 현재 시스템 점검 중으로 결제 없이 바로 체험하실 수 있습니다.
         </p>
-        <button className="btn btn-primary" onClick={toggleProDemo}>
-          {proUser ? "Pro 해지 (테스트)" : "Pro 활성화 (테스트)"}
+
+        <button
+          className="btn btn-primary"
+          style={{ width: "100%", padding: "14px", fontSize: "16px", marginBottom: "1rem" }}
+          onClick={toggleProDemo}
+        >
+          {proUser ? "Pro 해지하기" : "Pro 플랜 시작하기"}
         </button>
       </div>
 

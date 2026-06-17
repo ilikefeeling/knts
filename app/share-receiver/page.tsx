@@ -27,10 +27,12 @@ function ShareReceiverInner() {
   const id = searchParams.get("id");
   const errorParam = searchParams.get("error");
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState<boolean>(!!id);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sharedText, setSharedText] = useState<string>("");
+  const [lastActiveTargetId, setLastActiveTargetId] = useState<string | null>(null);
+  const [showAllTargets, setShowAllTargets] = useState<boolean>(false);
 
   // 원장에서 가져온 오늘 방문 대상 목록
   const [visits, setVisits] = useState<LedgerRecord[]>([]);
@@ -61,6 +63,21 @@ function ShareReceiverInner() {
   useEffect(() => {
     setRemaining(getRemainingFree());
     setProUserState(isProUser());
+  }, []);
+
+  // 컴포넌트 마운트 시 localStorage에서 직전 작업 대상 ID 로드
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedId = localStorage.getItem("last_active_target_id");
+      const timeStr = localStorage.getItem("last_active_time");
+      if (savedId && timeStr) {
+        const time = parseInt(timeStr, 10);
+        // 2시간 이내의 기록만 유효한 것으로 간주
+        if (Date.now() - time < 2 * 60 * 60 * 1000) {
+          setLastActiveTargetId(savedId);
+        }
+      }
+    }
   }, []);
 
   // 오늘 방문 대상 로드
@@ -94,15 +111,19 @@ function ShareReceiverInner() {
     if (!id) return;
     setLoading(true);
     fetch(`/api/share?id=${id}`)
-      .then((res) => res.json())
-      .then((data) => {
+      .then((res) => res.json().then(data => ({ status: res.status, data })))
+      .then(({ status, data }) => {
         if (data.error) {
+          console.error("Share API Error Response:", JSON.stringify({ status, data }, null, 2));
           setLoadError(data.error);
         } else {
           setSharedText(data.text);
         }
       })
-      .catch(() => setLoadError("공유 내용을 불러오지 못했습니다."))
+      .catch((err) => {
+        console.error("Share API Fetch Error:", err);
+        setLoadError("공유 내용을 불러오지 못했습니다.");
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -134,7 +155,7 @@ function ShareReceiverInner() {
   }
 
   function goToStep3AndClassify() {
-    setStep(3);
+    setStep(2);
     if (!sharedText) return;
 
     if (!canUseAutoClassify()) {
@@ -205,6 +226,12 @@ function ShareReceiverInner() {
 
     setSaved(true);
 
+    // 저장 성공 시 localStorage 컨텍스트 초기화
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("last_active_target_id");
+      localStorage.removeItem("last_active_time");
+    }
+
     // 4) 수신함(Pending)에서 삭제
     if (id) {
       await fetch(`/api/share?id=${id}`, { method: "DELETE" }).catch(() => {});
@@ -267,19 +294,12 @@ function ShareReceiverInner() {
           <div className="badge" style={{ marginBottom: 8 }}>
             🔗 클로바노트에서 공유됨
           </div>
-          <h1>상담 내용을 받았어요</h1>
-          <div className="card card-muted" style={{ whiteSpace: "pre-wrap" }}>
+          <h1>대상을 확인하고 선택해주세요</h1>
+
+          <div className="card card-muted" style={{ whiteSpace: "pre-wrap", marginBottom: "1.5rem", maxHeight: "120px", overflowY: "auto" }}>
+            <span style={{fontSize: 13, color: "var(--color-text-muted)", display: "block", marginBottom: 4}}>공유받은 텍스트:</span>
             {sharedText}
           </div>
-          <button className="btn btn-primary" onClick={() => setStep(2)}>
-            다음
-          </button>
-        </section>
-      )}
-
-      {step === 2 && (
-        <section>
-          <h1>어느 방문 건인가요?</h1>
 
           {visitsLoading ? (
             <div className="empty-state">
@@ -295,38 +315,94 @@ function ShareReceiverInner() {
               </p>
             </div>
           ) : (
-            visits.map((v, idx) => (
-              <button
-                key={v.id}
-                className={
-                  "visit-card" +
-                  (v.nextVisitTime ? " reserved" : "") +
-                  (selectedTarget?.id === v.id ? " selected" : "")
-                }
-                style={
-                  selectedTarget?.id === v.id
-                    ? { borderColor: "var(--color-primary)", background: "var(--color-primary-bg)" }
-                    : undefined
-                }
-                onClick={() => setSelectedTarget(v)}
-              >
-                <div className="visit-card-header">
-                  <span className="visit-order">{idx + 1}</span>
-                  <span className="visit-name">{v.name}</span>
-                  <div className="visit-badges">
-                    {v.nextVisitTime && (
-                      <span className="badge-reserved">
-                        🕐 예약 {v.nextVisitTime}
-                      </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginBottom: "1.5rem" }}>
+              {(() => {
+                const recommended = visits.filter(v => {
+                  const isContextMatch = v.id === lastActiveTargetId;
+                  const isTextMatch = sharedText.includes(v.name);
+                  return isContextMatch || isTextMatch;
+                });
+                
+                // 정렬: Context Match(방금 다녀온 곳)를 최상단으로
+                recommended.sort((a, b) => {
+                  if (a.id === lastActiveTargetId && b.id !== lastActiveTargetId) return -1;
+                  if (a.id !== lastActiveTargetId && b.id === lastActiveTargetId) return 1;
+                  return 0;
+                });
+
+                const others = visits.filter(v => {
+                  const isContextMatch = v.id === lastActiveTargetId;
+                  const isTextMatch = sharedText.includes(v.name);
+                  return !isContextMatch && !isTextMatch;
+                });
+
+                const hasMatch = recommended.length > 0;
+                const targetsToDisplay = (hasMatch && !showAllTargets) ? recommended : visits;
+
+                return (
+                  <div>
+                    <h3 style={{ fontSize: 15, marginBottom: 8, color: hasMatch && !showAllTargets ? "var(--color-primary)" : "var(--color-text)" }}>
+                      {hasMatch && !showAllTargets ? "✨ 1:1 매칭된 방문 대상" : "방문 명단"}
+                    </h3>
+                    
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {targetsToDisplay.map((v) => {
+                        const isRec = recommended.some(r => r.id === v.id);
+                        return (
+                          <button
+                            key={v.id}
+                            className={
+                              "visit-card" +
+                              (v.nextVisitTime ? " reserved" : "") +
+                              (selectedTarget?.id === v.id ? " selected" : "")
+                            }
+                            style={
+                              selectedTarget?.id === v.id
+                                ? { borderColor: "var(--color-primary)", background: "var(--color-primary-bg)" }
+                                : undefined
+                            }
+                            onClick={() => setSelectedTarget(v)}
+                          >
+                            <div className="visit-card-header">
+                              <span className="visit-order">{visits.indexOf(v) + 1}</span>
+                              <span className="visit-name">{v.name}</span>
+                              <div className="visit-badges">
+                                {isRec && v.id === lastActiveTargetId && (
+                                  <span className="badge" style={{ background: "#dbeafe", color: "#1e3a8a", padding: "2px 6px", fontSize: 11, border: "none", marginRight: 4 }}>
+                                    🎯 직전 방문
+                                  </span>
+                                )}
+                                {isRec && sharedText.includes(v.name) && (
+                                  <span className="badge" style={{ background: "#fef3c7", color: "#d97706", padding: "2px 6px", fontSize: 11, border: "none" }}>
+                                    ✨ 텍스트 일치
+                                  </span>
+                                )}
+                                {v.nextVisitTime && (
+                                  <span className="badge-reserved">🕐 예약 {v.nextVisitTime}</span>
+                                )}
+                                <span className="badge-visit-count">
+                                  {v.visitCount === 0 ? "최초" : `${v.visitCount + 1}회차`}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="visit-addr">{v.address}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {hasMatch && !showAllTargets && others.length > 0 && (
+                      <button 
+                        style={{ marginTop: 16, background: "none", border: "none", color: "var(--color-text-muted)", textDecoration: "underline", cursor: "pointer", fontSize: 13, textAlign: "center", width: "100%" }}
+                        onClick={() => setShowAllTargets(true)}
+                      >
+                        목록에 찾는 대상이 없나요? 전체 명단 보기
+                      </button>
                     )}
-                    <span className="badge-visit-count">
-                      {v.visitCount === 0 ? "최초" : `${v.visitCount + 1}회차`}
-                    </span>
                   </div>
-                </div>
-                <div className="visit-addr">{v.address}</div>
-              </button>
-            ))
+                );
+              })()}
+            </div>
           )}
 
           <button
@@ -334,12 +410,12 @@ function ShareReceiverInner() {
             onClick={goToStep3AndClassify}
             disabled={!selectedTarget}
           >
-            자동 정리하기
+            선택한 대상으로 자동 정리하기
           </button>
         </section>
       )}
 
-      {step === 3 && selectedTarget && (
+      {step === 2 && selectedTarget && (
         <section>
           <div className="badge" style={{ marginBottom: 8 }}>
             ✨ {selectedTarget.name} - 자동 정리 결과
@@ -508,7 +584,6 @@ function ShareReceiverInner() {
       <div className="dots">
         <div className={"dot" + (step === 1 ? " active" : "")} />
         <div className={"dot" + (step === 2 ? " active" : "")} />
-        <div className={"dot" + (step === 3 ? " active" : "")} />
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (!event.request.url.startsWith("http")) return;
   if (event.request.url.includes("/_next/webpack-hmr")) return;
+  if (event.request.headers.get("RSC") === "1") return;
 
   event.respondWith(
     (async () => {

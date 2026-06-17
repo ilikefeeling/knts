@@ -20,6 +20,7 @@ export default function Home() {
   const [todayStr, setTodayStr] = useState("");
   const [isHolidayToday, setIsHolidayToday] = useState(false);
   const [pendingItems, setPendingItems] = useState<any[]>([]);
+  const [showPendingModal, setShowPendingModal] = useState(false);
 
   const loadVisits = useCallback(async () => {
     try {
@@ -64,6 +65,20 @@ export default function Home() {
     }
   }, []);
 
+  async function handleDeletePendingItem(e: React.MouseEvent, id: string) {
+    e.stopPropagation();
+    if (!confirm("이 상담 내용을 목록에서 완전히 삭제하시겠습니까? (삭제 후 복구할 수 없습니다)")) return;
+    try {
+      await fetch(`/api/share?id=${id}`, { method: "DELETE" });
+      setPendingItems((prev) => prev.filter((item) => item.id !== id));
+      if (pendingItems.length <= 1) {
+        setShowPendingModal(false);
+      }
+    } catch (err) {
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  }
+
   useEffect(() => {
     loadVisits();
     loadPendingItems();
@@ -72,6 +87,11 @@ export default function Home() {
   async function handleTestSubmit() {
     if (!testText.trim() || !modalTarget) return;
     setSubmitting(true);
+    
+    // 테스트 전송 시에도 임시 저장 (테스트 편의성)
+    localStorage.setItem("last_active_target_id", modalTarget.id);
+    localStorage.setItem("last_active_time", Date.now().toString());
+
     try {
       const res = await fetch("/api/share", {
         method: "POST",
@@ -123,7 +143,7 @@ export default function Home() {
           </div>
           <button
             className="btn btn-primary"
-            onClick={() => router.push(`/share-receiver?id=${pendingItems[0].id}`)}
+            onClick={() => setShowPendingModal(true)}
           >
             정리하러 가기 →
           </button>
@@ -200,7 +220,7 @@ export default function Home() {
       ) : (
         <>
           <p style={{ fontSize: 13, color: "var(--color-text-muted)", margin: "0 0 0.5rem" }}>
-            📍 예약 건 우선 · 시간순 정렬 &nbsp;|&nbsp; 카드를 눌러 테스트 전송
+            📍 예약 건 우선 · 시간순 정렬 &nbsp;|&nbsp; 카드를 눌러 현장 작업 시작
           </p>
           {visits.map((v, idx) => (
             <div key={v.id} className="visit-card-row">
@@ -309,7 +329,7 @@ export default function Home() {
               }}
             />
 
-            <h4 style={{ margin: "0 0 8px" }}>🧪 텍스트 직접 입력 (테스트용)</h4>
+            <h4 style={{ margin: "0 0 8px" }}>⌨️ 텍스트 직접 입력</h4>
             <p style={{ fontSize: 14, margin: "0 0 8px" }}>
               PC 환경이거나 텍스트를 직접 복사한 경우 아래에 붙여넣고 전송하세요.
             </p>
@@ -347,6 +367,62 @@ export default function Home() {
       {/* ── SMS 모달 ── */}
       {smsTarget && (
         <SmsComposer record={smsTarget} onClose={() => setSmsTarget(null)} />
+      )}
+
+      {/* ── 대기열 모달 ── */}
+      {showPendingModal && (
+        <div className="modal-overlay" onClick={() => setShowPendingModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>📥 미정리 상담 내용 ({pendingItems.length}건)</h2>
+            <p style={{ fontSize: 14, color: "var(--color-text-muted)", marginBottom: "1rem" }}>
+              클로바노트에서 전송되었으나 아직 정리되지 않은 내역입니다. 정리할 항목을 선택해주세요.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "400px", overflowY: "auto", marginBottom: "1rem" }}>
+              {pendingItems.map((item) => (
+                <div key={item.id} style={{ display: "flex", alignItems: "stretch", gap: "8px" }}>
+                  <button
+                    className="card"
+                    style={{ flex: 1, textAlign: "left", cursor: "pointer", border: "1px solid var(--color-border)", padding: "12px", background: "var(--color-surface)" }}
+                    onClick={() => router.push(`/share-receiver?id=${item.id}`)}
+                  >
+                    <div style={{ fontSize: 12, color: "var(--color-text-muted)", marginBottom: 4 }}>
+                      {new Date(item.createdAt).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", color: "var(--color-text)" }}>
+                      {item.text || "(내용 없음)"}
+                    </div>
+                  </button>
+                  <button
+                    onClick={(e) => handleDeletePendingItem(e, item.id)}
+                    style={{
+                      background: "none",
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-danger, #d32f2f)",
+                      padding: "0 12px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    title="삭제"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="modal-actions">
+              <button
+                className="btn btn-ghost"
+                onClick={() => setShowPendingModal(false)}
+                style={{ border: "1px solid var(--color-border)" }}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

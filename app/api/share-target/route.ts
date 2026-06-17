@@ -46,10 +46,13 @@ async function processSharedText(sharedText: string, req: NextRequest) {
   }
 
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   const id = Math.random().toString(36).slice(2, 10);
 
   const insertData: any = { id, text: sharedText, status: 'pending' };
-  if (token) {
+  if (user) {
+    insertData.user_id = user.id;
+  } else if (token) {
     insertData.user_id = token;
   }
 
