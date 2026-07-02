@@ -121,13 +121,12 @@ export default function PhotoCapture({
           <label className={"photo-add-btn" + (uploading ? " disabled" : "")}>
             <span className="photo-add-icon">+</span>
             <span className="photo-add-text">
-              {photos.length === 0 ? "사진 촬영" : "추가"}
+              {photos.length === 0 ? "사진 등록" : "추가"}
             </span>
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
-              capture="environment"
               multiple
               onChange={handleFiles}
               style={{ display: "none" }}

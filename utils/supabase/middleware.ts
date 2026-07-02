@@ -40,14 +40,22 @@ export async function updateSession(request: NextRequest) {
                            !request.nextUrl.pathname.startsWith('/auth') && 
                            !request.nextUrl.pathname.startsWith('/api/auth') && 
                            !request.nextUrl.pathname.startsWith('/api/share-target') && 
+                           !request.nextUrl.pathname.startsWith('/api/restore-notices') && 
                            !request.nextUrl.pathname.startsWith('/guide') && 
                            !request.nextUrl.pathname.startsWith('/ios-guide') &&
-                           !request.nextUrl.pathname.startsWith('/start')
+                           !request.nextUrl.pathname.startsWith('/start') &&
+                           !request.nextUrl.pathname.startsWith('/pricing') &&
+                           request.nextUrl.pathname !== '/'
+
+  // Landing page is now public, so no redirect on root.
 
   if (!user && isProtectedRoute) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+      url.pathname = '/login/admin'
+    } else {
+      url.pathname = '/login'
+    }
     return NextResponse.redirect(url)
   }
 

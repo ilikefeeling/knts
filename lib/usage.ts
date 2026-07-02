@@ -11,7 +11,7 @@ const USAGE_KEY = "knts_usage_v1";
 const PRO_KEY = "knts_pro_v1";
 
 export const FREE_MONTHLY_LIMIT = 15;
-export const PRO_PRICE_KRW = 4900;
+export const PRO_PRICE_KRW = 10000;
 
 export type UsageState = {
   yearMonth: string; // "YYYY-MM"

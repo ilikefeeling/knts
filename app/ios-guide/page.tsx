@@ -190,7 +190,7 @@ export default function IosGuidePage() {
         <ul style={{ paddingLeft: "1.2rem", margin: 0, fontSize: 15, lineHeight: 1.6 }}>
           <li><strong>클로바노트</strong>: 텍스트를 복사할 앱입니다.</li>
           <li><strong>단축어 (Shortcuts)</strong>: 아이폰 기본 앱입니다. (지웠다면 App Store에서 설치)</li>
-          <li><strong>Field Master</strong>: 로그인까지 완료된 상태여야 합니다.</li>
+          <li><strong>Field Master</strong>: 관리자가 발급한 계정(전화번호)으로 로그인 및 Workspace(PIN) 접속까지 완료된 상태여야 합니다.</li>
         </ul>
       </div>
 
@@ -290,9 +290,25 @@ export default function IosGuidePage() {
       </div>
 
       <div style={{ textAlign: "center" }}>
-        <Link href="/" className="btn btn-primary" style={{ display: "inline-block", padding: "16px 32px", fontSize: "18px", borderRadius: "8px", fontWeight: "bold" }}>
-          홈으로 돌아가기
-        </Link>
+        <button 
+          onClick={async () => {
+            try {
+              const res = await fetch("/api/worker/guide-complete", { method: "POST" });
+              if (res.ok) {
+                alert("가이드 숙지 확인이 완료되었습니다. 감사합니다.");
+                window.location.href = "/worker";
+              } else {
+                alert("오류가 발생했습니다. 다시 시도해주세요.");
+              }
+            } catch (e) {
+              alert("오류가 발생했습니다.");
+            }
+          }}
+          className="btn btn-primary" 
+          style={{ display: "inline-block", padding: "16px 32px", fontSize: "18px", borderRadius: "8px", fontWeight: "bold", border: "none", cursor: "pointer", color: "white" }}
+        >
+          가이드 숙지 완료 및 홈으로 돌아가기
+        </button>
       </div>
     </div>
   );

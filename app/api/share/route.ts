@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabase
     .from("shared_texts")
-    .select("text, createdAt")
+    .select("id, text, createdAt")
     .eq("id", id)
     .single();
 

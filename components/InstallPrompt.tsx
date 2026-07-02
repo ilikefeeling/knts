@@ -90,14 +90,13 @@ export default function InstallPrompt() {
           PC에서 보고 계시네요
         </p>
         <p style={{ fontSize: 15, color: "var(--color-text-muted)", margin: "0 0 8px" }}>
-          ℹ️ 카카오로 로그인하신 후<br />
-          현장관리 시스템을 앱으로 설치하실 수 있습니다.
+          ℹ️ PC 바탕화면에 현장관리 시스템을<br />
+          앱으로 설치하여 더욱 편리하게 이용해 보세요.
         </p>
         <p style={{ fontSize: 14, color: "var(--color-text-muted)", margin: 0 }}>
           ⚠️ 단, 클로바노트 &quot;공유&quot;로 현장기록을 보내는 기능은{" "}
           <strong>휴대폰</strong>에서만 동작합니다. 현장기록 입력은
-          휴대폰으로, 명단 업로드·원장 관리·문자 발송은 PC에서도 동일하게
-          사용하실 수 있습니다.
+          휴대폰에서 진행해 주세요.
         </p>
       </div>
     );

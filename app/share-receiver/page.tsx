@@ -7,11 +7,9 @@ import {
   ResultOption,
   VISIT_TIME_OPTIONS,
 } from "@/lib/constants";
-import {
-  getTodayVisitList,
-  updateVisitResult,
-  type LedgerRecord,
-} from "@/lib/ledgerDB";
+import { submitVisitResult } from "@/lib/workerDb";
+import { type WorkerTarget as LedgerRecord, getAssignedTargets as getTodayVisitList } from "@/lib/workerDb";
+import { encryptText, decryptText } from "@/lib/crypto";
 import { addLog } from "@/lib/auditLog";
 import PhotoCapture from "@/components/PhotoCapture";
 import {
@@ -21,6 +19,8 @@ import {
   isProUser,
   FREE_MONTHLY_LIMIT,
 } from "@/lib/usage";
+import { getTargetPhotos, clearTargetPhotos } from "@/utils/idbUtils";
+import { createClient } from "@/utils/supabase/client";
 
 function ShareReceiverInner() {
   const searchParams = useSearchParams();
@@ -54,6 +54,7 @@ function ShareReceiverInner() {
 
   // 현장 사진
   const [photos, setPhotos] = useState<string[]>([]);
+  const [localBlobs, setLocalBlobs] = useState<{ blob: Blob; url: string }[]>([]);
 
   // AI 자동분류 사용량(Freemium) 상태
   const [limitReached, setLimitReached] = useState(false);
@@ -64,6 +65,30 @@ function ShareReceiverInner() {
     setRemaining(getRemainingFree());
     setProUserState(isProUser());
   }, []);
+
+  // 단계2 진입 시 로컬 임시저장된 사진 불러오기
+  useEffect(() => {
+    if (step === 2 && selectedTarget) {
+      let active = true;
+      getTargetPhotos(selectedTarget.id).then((blobs) => {
+        if (!active) return;
+        if (blobs.length > 0) {
+          const loaded = blobs.map((blob) => ({
+            blob,
+            url: URL.createObjectURL(blob),
+          }));
+          setLocalBlobs(loaded);
+          setPhotos((prev) => {
+            // 중복 방지 (기존 photos에 없는 것만 추가)
+            const existingUrls = new Set(prev);
+            const newUrls = loaded.map((l) => l.url).filter(u => !existingUrls.has(u));
+            return [...newUrls, ...prev];
+          });
+        }
+      });
+      return () => { active = false; };
+    }
+  }, [step, selectedTarget]);
 
   // 컴포넌트 마운트 시 localStorage에서 직전 작업 대상 ID 로드
   useEffect(() => {
@@ -84,7 +109,20 @@ function ShareReceiverInner() {
   const loadVisits = useCallback(async () => {
     try {
       const list = await getTodayVisitList();
-      setVisits(list);
+      const currentPin = sessionStorage.getItem("workspace_pin");
+      if (!currentPin) {
+        setVisits(list); // PIN이 없으면 복호화 불가 (로그인 화면에서 막히겠지만 혹시 모르니)
+        return;
+      }
+      const decryptedList = await Promise.all(
+        list.map(async (v) => ({
+          ...v,
+          name: await decryptText(v.name, currentPin),
+          address: await decryptText(v.address, currentPin),
+          detail_address: await decryptText(v.detail_address, currentPin),
+        }))
+      );
+      setVisits(decryptedList);
     } catch (err) {
       console.error("방문명단 로드 실패:", err);
     } finally {
@@ -182,15 +220,42 @@ function ShareReceiverInner() {
     const nextDate = isRevisit ? revisitDate : null;
     const nextTime = isRevisit ? revisitTime : null;
 
-    // 1) 원장 레코드 업데이트
-    const updated = await updateVisitResult(
+    // 0) 로컬 사진들(IndexedDB)을 Supabase에 업로드
+    const supabase = createClient();
+    const finalPhotos: string[] = [];
+    
+    for (const p of photos) {
+      const localMatch = localBlobs.find((lb) => lb.url === p);
+      if (localMatch) {
+        const fileExt = localMatch.blob.type.split("/")[1] || "jpeg";
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+        const filePath = `records/${fileName}`;
+        const { error } = await supabase.storage.from("photos").upload(filePath, localMatch.blob);
+        if (!error) {
+          const { data } = supabase.storage.from("photos").getPublicUrl(filePath);
+          finalPhotos.push(data.publicUrl);
+        }
+      } else {
+        finalPhotos.push(p);
+      }
+    }
+
+    // 1) 원장 레코드 업데이트 (E2EE)
+    const pin = sessionStorage.getItem("workspace_pin");
+    const encMemo = await encryptText(summary, pin || "");
+    const isSuccess = result !== "미방문";
+    const encReason = isSuccess ? "" : await encryptText(result, pin || "");
+
+    await submitVisitResult(
       selectedTarget.id,
-      result,
-      summary,
-      nextDate,
-      nextTime,
-      photos
+      isSuccess,
+      encReason,
+      encMemo,
+      finalPhotos
     );
+
+    // IndexedDB 비우기
+    await clearTargetPhotos(selectedTarget.id);
 
     // 2) Audit Log: 현장 방문 기록
     await addLog({
@@ -198,16 +263,15 @@ function ShareReceiverInner() {
       recordName: selectedTarget.name,
       action: "VISIT_RECORDED",
       before: {
-        lastVisitResult: selectedTarget.lastVisitResult,
         visitCount: selectedTarget.visitCount,
       },
       after: {
         lastVisitResult: result,
-        lastVisitSummary: summary,
-        lastVisitPhotos: photos.length > 0 ? `${photos.length}장` : "없음",
+        lastVisitSummary: "E2EE Encrypted",
+        lastVisitPhotos: finalPhotos.length > 0 ? `${finalPhotos.length}장` : "없음",
         visitCount: (selectedTarget.visitCount || 0) + 1,
       },
-      reason: "현장 방문 기록",
+      reason: "현장 방문 기록 (B2G)",
       reasonCategory: null,
     });
 
@@ -226,21 +290,32 @@ function ShareReceiverInner() {
 
     setSaved(true);
 
-    // 저장 성공 시 localStorage 컨텍스트 초기화
+    // 4) 기기 내 민감 데이터 완전 파기 (Zero Data Policy)
     if (typeof window !== "undefined") {
       localStorage.removeItem("last_active_target_id");
       localStorage.removeItem("last_active_time");
     }
+    
+    // React 메모리 상태 초기화 (사진, 텍스트 등 즉시 증발)
+    setPhotos([]);
+    setLocalBlobs((prev) => {
+      prev.forEach((p) => URL.revokeObjectURL(p.url));
+      return [];
+    });
+    setSummary("");
+    setSharedText("");
+    setResult("미방문");
 
-    // 4) 수신함(Pending)에서 삭제
+    // 5) 수신함(Pending)에서 삭제
     if (id) {
       await fetch(`/api/share?id=${id}`, { method: "DELETE" }).catch(() => {});
     }
 
-    // 업데이트된 레코드로 selectedTarget 갱신 (화면 표시용)
-    if (updated) {
-      setSelectedTarget(updated);
-    }
+    // 업데이트된 레코드로 selectedTarget 갱신 (목록에서 사라짐)
+    setSelectedTarget(null);
+    
+    // 파기 완료 시각적 피드백 제공
+    alert("✅ 전송 완료\n보안 규정에 따라 단말기 내 체납자 관련 데이터(사진, 메모)가 복구 불가능하게 영구 파기되었습니다.");
   }
 
   // ---------- 화면 ----------
@@ -385,7 +460,7 @@ function ShareReceiverInner() {
                                 </span>
                               </div>
                             </div>
-                            <div className="visit-addr">{v.address}</div>
+                            <div className="visit-addr">{v.address} {v.detail_address}</div>
                           </button>
                         );
                       })}
@@ -445,9 +520,9 @@ function ShareReceiverInner() {
                 아래 항목은 직접 선택/입력하면 그대로 저장됩니다. AI 자동분류를
                 계속 이용하시려면 Pro로 업그레이드해주세요.
               </p>
-              <a className="btn btn-primary" href="/pricing">
-                ✨ Pro 요금제 보기
-              </a>
+              <div className="btn btn-primary" style={{ cursor: "default", opacity: 0.9 }}>
+                ✨ Pro 요금제 보기 (가이드용)
+              </div>
             </div>
           )}
 
@@ -560,12 +635,20 @@ function ShareReceiverInner() {
                   textAlign: "center",
                 }}
               >
-                ✅ 저장되었습니다.
-                {result === "재방문필요" && revisitDate && (
-                  <div style={{ fontSize: 14, marginTop: 4 }}>
-                    재방문 예약: {revisitDate} {revisitTime}
-                  </div>
-                )}
+                <div style={{ textAlign: "center", padding: "20px 0" }}>
+                  <div style={{ fontSize: "2rem", marginBottom: "8px" }}>🎉</div>
+                  <h2 style={{ fontSize: "1.2rem", color: "#16a34a", marginBottom: "4px" }}>
+                    ✅ 관리자에게 결과 보고가 완료되었습니다.
+                  </h2>
+                  {result === "재방문필요" && revisitDate && (
+                    <div style={{ fontSize: 14, marginTop: 8, color: "#15803d" }}>
+                      재방문 예약: {revisitDate} {revisitTime}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div style={{ padding: "12px", background: "#fef2f2", color: "#991b1b", borderRadius: "8px", fontSize: "13px", lineHeight: "1.5", textAlign: "center", border: "1px solid #fecaca" }}>
+                <strong>보안 안내:</strong> 오늘 예정된 모든 현장 업무가 끝났다면,<br/>홈 화면 우측 상단의 <strong>[🔒 업무 종료 (데이터 잠금)]</strong> 버튼을 눌러 반드시 기기 내 민감정보를 파기해 주세요.
               </div>
               <a className="btn btn-primary" href="/">홈으로 돌아가기</a>
             </div>
@@ -575,7 +658,7 @@ function ShareReceiverInner() {
               onClick={handleSave}
               disabled={classifying}
             >
-              ✓ 저장하기
+              📤 방문내용 보고하기
             </button>
           )}
         </section>

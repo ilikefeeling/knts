@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "verify": "node scripts/verify-code.mjs && node scripts/verify-db.mjs",
+    "generate-excel": "node generate_sample_excel.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

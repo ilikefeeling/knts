@@ -7,22 +7,25 @@ export async function GET(req: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ pending: [] });
     }
 
     const { data, error } = await supabase
       .from("shared_texts")
-      .select("id, text, createdAt")
+      .select("id, text, created_at")
       .eq("user_id", user.id)
       .eq("status", "pending")
-      .order("createdAt", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      // shared_texts 테이블이 미존재하거나 컬럼 에러 등 모든 DB 에러 시 빈 배열 반환
+      console.warn("[/api/share/pending] DB error (graceful fallback):", error.message);
+      return NextResponse.json({ pending: [] });
     }
 
     return NextResponse.json({ pending: data || [] });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.warn("[/api/share/pending] Unexpected error (graceful fallback):", error.message);
+    return NextResponse.json({ pending: [] });
   }
 }
