@@ -652,14 +652,14 @@ export async function registerWorkerAccount(name: string, phone: string, initial
 
   const phoneDigits = phone.replace(/[^0-9]/g, '');
   const dummyEmail = `${phoneDigits}@knts.local`;
-  const safePin = initialPin.padEnd(6, '0');
+  const generatedPin = initialPin.padEnd(6, '0');
 
   let signUpData, signUpError;
 
   if (serviceRoleKey) {
     const res = await tempSupabase.auth.admin.createUser({
       email: dummyEmail,
-      password: safePin,
+      password: generatedPin,
       email_confirm: true,
     });
     signUpData = res.data;
@@ -667,7 +667,7 @@ export async function registerWorkerAccount(name: string, phone: string, initial
   } else {
     const res = await tempSupabase.auth.signUp({
       email: dummyEmail,
-      password: safePin,
+      password: generatedPin,
     });
     signUpData = res.data;
     signUpError = res.error;
@@ -813,8 +813,8 @@ export async function updateWorker(id: string, name: string, newPin?: string) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (serviceRoleKey) {
       const tempSupabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey, { auth: { persistSession: false } });
-      const safePin = newPin.padEnd(6, '0');
-      const { error: authError } = await tempSupabase.auth.admin.updateUserById(id, { password: safePin });
+      const generatedPin = newPin.padEnd(6, '0');
+      const { error: authError } = await tempSupabase.auth.admin.updateUserById(id, { password: generatedPin });
       if (authError) return { success: false, message: authError.message };
     }
   }

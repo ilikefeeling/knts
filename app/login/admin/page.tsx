@@ -59,9 +59,11 @@ export default function AdminLoginPage() {
   };
 
   const handleDevAdminLogin = async () => {
+    const devPw = prompt("개발자용 로그인 비밀번호를 입력하세요.");
+    if (!devPw) return;
+
     setLoading(true);
     const devEmail = "admin@knts.local";
-    const devPw = "admin1234";
 
     // 1. 로그인 시도
     let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -212,13 +214,15 @@ export default function AdminLoginPage() {
         </div>
       </form>
 
-      <button 
-        onClick={handleDevAdminLogin}
-        style={{ width: "100%", padding: "14px", fontSize: "14px", fontWeight: "bold", backgroundColor: "#333", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", marginBottom: "15px" }}
-        disabled={loading}
-      >
-        [개발자용] 관리자(Admin) 계정 자동 로그인
-      </button>
+      {process.env.NODE_ENV !== "production" && (
+        <button 
+          onClick={handleDevAdminLogin}
+          style={{ width: "100%", padding: "14px", fontSize: "14px", fontWeight: "bold", backgroundColor: "#333", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", marginBottom: "15px" }}
+          disabled={loading}
+        >
+          [개발자용] 관리자(Admin) 계정 로그인
+        </button>
+      )}
 
       <div style={{ marginTop: "20px", padding: "15px", background: "#f0fdf4", borderRadius: "8px", border: "1px solid #bbf7d0" }}>
         <p style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#166534", fontWeight: "bold" }}>혹시 현장 실태확인원이신가요?</p>
