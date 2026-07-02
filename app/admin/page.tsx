@@ -104,8 +104,8 @@ export default function AdminDashboard() {
 
     ledgers.forEach(l => {
       // 재무 데이터
-      totalArrears += (l.arrears_amount || 0);
-      totalPaid += (l.paid_amount || 0);
+      totalArrears += Number(String(l.arrears_amount || 0).replace(/,/g, "")) || 0;
+      totalPaid += Number(String((l as any).paid_amount || 0).replace(/,/g, "")) || 0;
 
       // 현황
       if (l.current_status === "UNASSIGNED") unassigned++;
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
 
   if (!isPinEntered) {
     return (
-      <div style={{ display: "flex", height: "100vh", background: "#0f172a", alignItems: "center", justify: "center" }}>
+      <div style={{ display: "flex", height: "100vh", background: "#0f172a", alignItems: "center", justifyContent: "center" }}>
         <div style={{ background: "#1e293b", padding: "40px", borderRadius: "16px", textAlign: "center", boxShadow: "0 10px 25px rgba(0,0,0,0.5)", border: "1px solid #334155", maxWidth: "400px", width: "90%" }}>
           <h2 style={{ color: "white", marginTop: 0, marginBottom: "8px" }}>관리자 접속</h2>
           <p style={{ color: "#94a3b8", fontSize: "14px", marginBottom: "24px" }}>안전한 환경을 위해 PIN을 입력해 주세요.</p>

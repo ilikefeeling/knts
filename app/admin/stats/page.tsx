@@ -60,8 +60,8 @@ export default function StatsPage() {
         if (l.current_status === "COMPLETED") {
           stats[l.assigned_worker_id].completed += 1;
         }
-        stats[l.assigned_worker_id].totalArrears += (l.arrears_amount || 0);
-        stats[l.assigned_worker_id].totalPaid += (l.paid_amount || 0);
+        stats[l.assigned_worker_id].totalArrears += Number(String(l.arrears_amount || 0).replace(/,/g, "")) || 0;
+        stats[l.assigned_worker_id].totalPaid += Number(String((l as any).paid_amount || 0).replace(/,/g, "")) || 0;
       }
     });
 

@@ -53,7 +53,7 @@ export default function ExcelUploader({ campaignId, onComplete, hasVisits }: Pro
 
       const dataRows: AdminExcelRow[] = [];
       for (let i = 1; i < json.length; i++) { // 첫 행은 헤더이므로 스킵
-        const r = json[i] as unknown[];
+        const r = json[i] as any;
         if (!r || r.length < 3) continue;
 
         const mgmtNum = String(r[0] || "").trim();
@@ -103,7 +103,7 @@ export default function ExcelUploader({ campaignId, onComplete, hasVisits }: Pro
         await addLog({
           recordId: campaignId,
           recordName: fileName,
-          action: "EXCEL_UPLOAD",
+          action: "EXCEL_UPLOAD" as any,
           before: null,
           after: { rows: rows.length, master: res.masterCount, task: res.taskCount },
           reason: "방문 배정 그룹에 엑셀 데이터 업로드",

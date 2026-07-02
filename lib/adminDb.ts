@@ -320,6 +320,38 @@ export async function getLicenseStatus() {
   };
 }
 
+export async function processPayment(slots: number, months: number, totalAmount: number) {
+  noStore();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: license, error: fetchError } = await supabase.from("admin_licenses").select("*").eq("admin_id", user.id).single();
+  
+  if (fetchError || !license) {
+    throw new Error("라이선스 정보를 찾을 수 없습니다.");
+  }
+
+  // 남은 기간 계산하여 연장
+  const now = new Date();
+  const currentValidUntil = new Date(license.valid_until);
+  const baseDate = currentValidUntil > now ? currentValidUntil : now;
+  
+  const newValidUntil = new Date(baseDate.setMonth(baseDate.getMonth() + months)).toISOString();
+  const newTotalSlots = license.total_slots + slots;
+
+  const { error: updateError } = await supabase.from("admin_licenses").update({
+    total_slots: newTotalSlots,
+    valid_until: newValidUntil
+  }).eq("admin_id", user.id);
+
+  if (updateError) {
+    throw new Error("라이선스 업데이트 중 오류가 발생했습니다.");
+  }
+  
+  return true;
+}
+
 export async function assignTarget(taskId: string, workerId: string | null): Promise<void> {
   const supabase = await createClient();
   

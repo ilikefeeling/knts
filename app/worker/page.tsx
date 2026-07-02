@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -102,6 +102,22 @@ export default function Home() {
       console.error("미정리 항목 로드 실패:", err);
     }
   }, []);
+
+  const handleDeletePendingItem = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm("정말 이 미정리 항목을 삭제하시겠습니까?")) return;
+    try {
+      const res = await fetch(`/api/share?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPendingItems((prev) => prev.filter((item) => item.id !== id));
+      } else {
+        alert("삭제에 실패했습니다.");
+      }
+    } catch (err) {
+      console.error("삭제 에러:", err);
+      alert("오류가 발생했습니다.");
+    }
+  };
 
   const [workerName, setWorkerName] = useState<string>("");
   const [guideCompleted, setGuideCompleted] = useState<boolean | null>(null);
@@ -691,7 +707,7 @@ export default function Home() {
 
       {/* ── SMS 모달 ── */}
       {smsTarget && (
-        <SmsComposer record={smsTarget} onClose={() => setSmsTarget(null)} />
+        <SmsComposer record={smsTarget as any} onClose={() => setSmsTarget(null)} />
       )}
 
       {/* ── 대기열 모달 ── */}

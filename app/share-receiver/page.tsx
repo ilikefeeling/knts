@@ -243,7 +243,7 @@ function ShareReceiverInner() {
     // 1) 원장 레코드 업데이트 (E2EE)
     const pin = sessionStorage.getItem("workspace_pin");
     const encMemo = await encryptText(summary, pin || "");
-    const isSuccess = result !== "미방문";
+    const isSuccess = (result as string) !== "미방문";
     const encReason = isSuccess ? "" : await encryptText(result, pin || "");
 
     await submitVisitResult(
@@ -304,7 +304,7 @@ function ShareReceiverInner() {
     });
     setSummary("");
     setSharedText("");
-    setResult("미방문");
+    setResult("재방문필요");
 
     // 5) 수신함(Pending)에서 삭제
     if (id) {
