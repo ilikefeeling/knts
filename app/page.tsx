@@ -94,7 +94,7 @@ export default function LandingPage() {
             boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
             padding: "20px"
           }}>
-            <img src="/nts-logo-real.jpg" alt="국세청 로고" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <img src="/nts-logo-real.jpg" alt="국세청 로고" style={{ width: "100%", height: "100%", objectFit: "contain", transform: "scale(1.2)" }} />
           </div>
           <div style={{ textAlign: "center", width: "100%" }}>
             <h2 style={{ fontSize: "32px", fontWeight: "900", margin: "0 0 16px 0", letterSpacing: "-1px" }}>
