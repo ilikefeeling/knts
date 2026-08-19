@@ -136,7 +136,7 @@ export default function TargetsPage() {
                           }}
                         />
                       </td>
-                      <td style={{ padding: "12px", fontWeight: "500" }}>{ledger.management_number || "-"}</td>
+                      <td style={{ padding: "12px", fontWeight: "500" }}>{ledger.management_num || "-"}</td>
                       <td style={{ padding: "12px", fontWeight: "bold" }}>{ledger.name}</td>
                       <td style={{ padding: "12px", color: "#cbd5e1" }}>{ledger.phone || "-"}</td>
                       <td style={{ padding: "12px", color: "#cbd5e1", maxWidth: "250px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
