@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     siteName: "국세청 현장 확인원",
     images: [
       {
-        url: "/opengraph-image.png?v=2",
+        url: "/opengraph-image.png?v=3",
         width: 1200,
         height: 630,
         alt: "국세청 실태확인원 OG Image",
