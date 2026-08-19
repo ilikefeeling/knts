@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import React from "react";
 
 export default async function AdminLayout({
@@ -7,11 +8,19 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") || "";
+
+  // /admin/login 페이지는 레이아웃의 인증 체크 및 [관] 뱃지 예외 처리
+  if (pathname.startsWith("/admin/login")) {
+    return <>{children}</>;
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login/admin");
+    redirect("/admin/login");
   }
 
   const { data: profile } = await supabase

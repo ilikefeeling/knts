@@ -29,6 +29,13 @@ export default function CampaignsPage() {
       return;
     }
     loadCampaigns();
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("upload") === "true") {
+        setShowUploadWizard(true);
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -120,10 +127,10 @@ export default function CampaignsPage() {
     <div style={{ display: "flex", minHeight: "100vh", background: "#0f172a", fontFamily: "'Pretendard', sans-serif" }}>
       <AdminSidebar />
       <div style={{ flex: 1, padding: "32px", overflowY: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
           <div>
-            <h1 style={{ color: "white", fontSize: "28px", margin: "0 0 8px 0" }}>방문 배정 관리</h1>
-            <p style={{ color: "#94a3b8", margin: 0 }}>DB 부하 없이 개별 배정 그룹 단위로 접근하며, 동선 기반 스마트 배정을 지원합니다.</p>
+            <h1 style={{ color: "white", fontSize: "28px", margin: "0 0 8px 0" }}>현장 방문 배정</h1>
+            <p style={{ color: "#94a3b8", margin: 0 }}>엑셀 명단을 올리면 [체납자 통합 원장 DB]가 자동으로 구축되며, 동시에 실태확인원 방문 지시 배정이 완성됩니다.</p>
           </div>
           <div style={{ display: "flex", gap: "12px" }}>
             <input 
@@ -137,7 +144,7 @@ export default function CampaignsPage() {
           </div>
         </div>
 
-        {/* 배정 선택기 */}
+        {/* 배정 선택기 & 통합 엑셀 업로드 단일창 */}
         <div style={{ marginBottom: "24px", display: "flex", alignItems: "center", gap: "16px" }}>
           <span style={{ color: "#cbd5e1", fontWeight: "bold" }}>현재 작업 배정:</span>
           <select 
@@ -154,7 +161,7 @@ export default function CampaignsPage() {
             onClick={() => setShowUploadWizard(true)}
             style={{ padding: "10px 16px", borderRadius: "8px", background: "#3b82f6", color: "white", border: "none", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}
           >
-            📥 엑셀 명단(체납자 방문 대상자 목록) 업로드 (큐 처리)
+            📥 엑셀 명단 통합 업로드 (원장 DB + 방문 배정 동시 완료)
           </button>
         </div>
 

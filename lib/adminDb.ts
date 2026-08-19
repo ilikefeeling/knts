@@ -105,7 +105,7 @@ export async function getAllEncryptedMasterLedgers() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
   
-  const { data, error } = await supabase.from("master_ledger").select("id, name, address, detail_address");
+  const { data, error } = await supabase.from("master_ledger").select("id, name, address, detail_address").eq("admin_id", user.id);
   if (error) throw error;
   return data;
 }
@@ -115,7 +115,13 @@ export async function getAllEncryptedVisitRecords() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { data, error } = await supabase.from("visit_records").select("id, worker_memo, unvisited_reason");
+  // Get workers for this admin
+  const { data: workers } = await supabase.from("profiles").select("id").eq("admin_id", user.id).eq("role", "WORKER");
+  const workerIds = workers?.map(w => w.id) || [];
+  
+  if (workerIds.length === 0) return [];
+
+  const { data, error } = await supabase.from("visit_records").select("id, worker_memo, unvisited_reason").in("worker_id", workerIds);
   if (error) throw error;
   return data;
 }
@@ -126,7 +132,7 @@ export async function updateBulkEncryptedMasterLedgers(updates: {id: string, nam
   if (!user) throw new Error("Unauthorized");
 
   for (const update of updates) {
-    await supabase.from("master_ledger").update({name: update.name, address: update.address, detail_address: update.detail_address}).eq("id", update.id);
+    await supabase.from("master_ledger").update({name: update.name, address: update.address, detail_address: update.detail_address}).eq("id", update.id).eq("admin_id", user.id);
   }
 }
 
@@ -135,8 +141,12 @@ export async function updateBulkEncryptedVisitRecords(updates: {id: string, work
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const { data: workers } = await supabase.from("profiles").select("id").eq("admin_id", user.id).eq("role", "WORKER");
+  const workerIds = workers?.map(w => w.id) || [];
+  if (workerIds.length === 0) return;
+
   for (const update of updates) {
-    await supabase.from("visit_records").update({worker_memo: update.worker_memo, unvisited_reason: update.unvisited_reason}).eq("id", update.id);
+    await supabase.from("visit_records").update({worker_memo: update.worker_memo, unvisited_reason: update.unvisited_reason}).eq("id", update.id).in("worker_id", workerIds);
   }
 }
 
@@ -145,9 +155,13 @@ export async function updateBulkEncryptedVisitRecords(updates: {id: string, work
 // ---------------------------------------------------------
 export async function getCampaigns(): Promise<Campaign[]> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { data, error } = await supabase
     .from("campaigns")
     .select("*")
+    .eq("admin_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -183,12 +197,16 @@ export async function createCampaign(name: string, description: string): Promise
 export async function getTaskLedgers(campaignId?: string): Promise<TaskLedger[]> {
   noStore();
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   let query = supabase
     .from("task_ledger")
     .select(`
       *,
       master_ledger:master_id (*)
     `)
+    .eq("admin_id", user.id)
     .order("created_at", { ascending: false });
 
   if (campaignId) {
@@ -232,13 +250,15 @@ export async function getWorkers(): Promise<Profile[]> {
 export async function fixCorruptedLedgers(): Promise<{ success: boolean; fixedCount: number; message?: string }> {
   try {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
     
-    // 1) Fetch all valid workers
-    const { data: workers } = await supabase.from("profiles").select("id").eq("role", "WORKER");
+    // 1) Fetch all valid workers for this admin
+    const { data: workers } = await supabase.from("profiles").select("id").eq("admin_id", user.id).eq("role", "WORKER");
     const validIds = new Set(workers?.map(w => w.id) || []);
 
-    // 2) Fetch all ledgers
-    const { data: ledgers } = await supabase.from("task_ledger").select("id, assigned_worker_id, current_status");
+    // 2) Fetch all ledgers for this admin
+    const { data: ledgers } = await supabase.from("task_ledger").select("id, assigned_worker_id, current_status").eq("admin_id", user.id);
     
     let fixedCount = 0;
     if (ledgers) {
@@ -1085,3 +1105,150 @@ export async function upsertLedgerFromExcel(campaignId: string, rows: AdminExcel
     return { success: false, masterCount: 0, taskCount: 0, message: error.message };
   }
 }
+
+// ---------------------------------------------------------
+// 대시보드 전용 집계 함수
+// ---------------------------------------------------------
+
+export type DashboardWorkerSummary = {
+  id: string;
+  name: string;
+  phone: string | null;
+  status: string;
+  guide_completed_at: string | null;
+  assigned_count: number;
+  completed_today: number;
+  assigned_today: number;
+};
+
+export type RecentActivity = {
+  id: string;
+  created_at: string;
+  action_type: string;
+  worker_name?: string;
+  target_name?: string;
+};
+
+export async function getDashboardStats(): Promise<{
+  workers: DashboardWorkerSummary[];
+  statusCounts: { unassigned: number; assigned: number; pending: number; completed: number };
+  licenseInfo: { totalSlots: number; usedSlots: number; validUntil: string; isValid: boolean } | null;
+}> {
+  noStore();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  // 1. 확인원 목록
+  const { data: workerProfiles } = await supabase
+    .from("profiles")
+    .select("id, name, phone, status, guide_completed_at")
+    .eq("role", "WORKER")
+    .eq("admin_id", user.id);
+
+  // 2. 전체 task_ledger 상태별 카운트 (해당 관리자 소속만)
+  const { data: allTasks } = await supabase
+    .from("task_ledger")
+    .select("id, current_status, assigned_worker_id, updated_at")
+    .eq("admin_id", user.id);
+
+  const statusCounts = { unassigned: 0, assigned: 0, pending: 0, completed: 0 };
+  const workerAssignMap = new Map<string, number>();
+  const workerCompletedTodayMap = new Map<string, number>();
+  const workerAssignedTodayMap = new Map<string, number>();
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  allTasks?.forEach(t => {
+    switch (t.current_status) {
+      case "UNASSIGNED": statusCounts.unassigned++; break;
+      case "ASSIGNED": statusCounts.assigned++; break;
+      case "PENDING_ACCEPT": statusCounts.pending++; break;
+      case "COMPLETED": statusCounts.completed++; break;
+      default: statusCounts.unassigned++; break;
+    }
+
+    if (t.assigned_worker_id) {
+      workerAssignMap.set(t.assigned_worker_id, (workerAssignMap.get(t.assigned_worker_id) || 0) + 1);
+
+      const updatedAt = new Date(t.updated_at);
+      if (updatedAt >= todayStart) {
+        if (t.current_status === "COMPLETED") {
+          workerCompletedTodayMap.set(t.assigned_worker_id, (workerCompletedTodayMap.get(t.assigned_worker_id) || 0) + 1);
+        }
+        if (t.current_status === "ASSIGNED" || t.current_status === "PENDING_ACCEPT") {
+          workerAssignedTodayMap.set(t.assigned_worker_id, (workerAssignedTodayMap.get(t.assigned_worker_id) || 0) + 1);
+        }
+      }
+    }
+  });
+
+  const workers: DashboardWorkerSummary[] = (workerProfiles || []).map(w => ({
+    id: w.id,
+    name: w.name || "이름없음",
+    phone: w.phone,
+    status: w.status,
+    guide_completed_at: w.guide_completed_at,
+    assigned_count: workerAssignMap.get(w.id) || 0,
+    completed_today: workerCompletedTodayMap.get(w.id) || 0,
+    assigned_today: workerAssignedTodayMap.get(w.id) || 0,
+  }));
+
+  // 3. 라이선스 정보
+  let licenseInfo = null;
+  try {
+    const status = await getLicenseStatus();
+    licenseInfo = {
+      totalSlots: status.totalSlots,
+      usedSlots: status.usedSlots,
+      validUntil: status.validUntil,
+      isValid: status.isValid,
+    };
+  } catch (e) {
+    // 라이선스 테이블 없을 수 있음
+  }
+
+  return { workers, statusCounts, licenseInfo };
+}
+
+export async function getRecentActivities(limit: number = 8): Promise<RecentActivity[]> {
+  noStore();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  // assignment_logs에서 최근 활동 가져오기
+  // worker_id를 기준으로 현재 관리자 소속의 로그만 가져옵니다.
+  const { data: workers } = await supabase.from("profiles").select("id").eq("admin_id", user.id).eq("role", "WORKER");
+  const workerIds = workers?.map(w => w.id) || [];
+  
+  if (workerIds.length === 0) return [];
+
+  const { data: logs, error } = await supabase
+    .from("assignment_logs")
+    .select("id, created_at, action_type, worker_id")
+    .in("worker_id", workerIds)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !logs) return [];
+
+  // worker 이름 매핑
+  const logWorkerIds = [...new Set(logs.map(l => l.worker_id).filter(Boolean))];
+  const { data: workerProfiles } = await supabase
+    .from("profiles")
+    .select("id, name")
+    .in("id", logWorkerIds.length > 0 ? logWorkerIds : ["__none__"]);
+
+  const workerNameMap = new Map<string, string>();
+  workerProfiles?.forEach(w => workerNameMap.set(w.id, w.name || "이름없음"));
+
+  return logs.map(l => ({
+    id: l.id,
+    created_at: l.created_at,
+    action_type: l.action_type,
+    worker_name: l.worker_id ? workerNameMap.get(l.worker_id) || "알 수 없음" : undefined,
+  }));
+}
+

@@ -18,6 +18,12 @@ async function restore() {
     { admin_id: admin.id, title: '시스템 정기 점검 안내 (예정)', content: '이번 주 금요일 밤 12시부터 새벽 2시까지 시스템 정기 점검이 있을 예정입니다. 이 시간에는 앱 접속 및 결과 보고가 제한될 수 있으니 미리 보고를 완료해 주세요.', is_important: false }
   ];
 
+  // 먼저 기존 공지사항을 싹 다 지웁니다 (중복 방지)
+  const { error: delErr } = await supabase.from('notices').delete().neq('title', 'NOT_EXISTING');
+  if (delErr) {
+    console.error('Failed to clear notices:', delErr);
+  }
+
   const { data, error } = await supabase.from('notices').insert(noticesToInsert).select();
   if (error) {
     console.error('Restore failed:', error);

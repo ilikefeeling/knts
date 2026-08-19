@@ -60,13 +60,26 @@ export default function AdminSidebar({ onTestGuideSuccess }: { onTestGuideSucces
           onClick={(e) => handleMenuClick(e, "/admin/targets")}
           style={{ 
             padding: "12px 16px", borderRadius: "8px", border: "none", display: "block", transition: "background 0.2s", textDecoration: "none",
-            background: pathname.startsWith("/admin/targets") ? "rgba(255,255,255,0.1)" : "transparent",
-            color: pathname.startsWith("/admin/targets") ? "white" : "#cbd5e1"
+            background: pathname === "/admin/targets" ? "rgba(255,255,255,0.1)" : "transparent",
+            color: pathname === "/admin/targets" ? "white" : "#cbd5e1"
           }}
-          onMouseOver={(e) => { if (!pathname.startsWith("/admin/targets")) e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
-          onMouseOut={(e) => { if (!pathname.startsWith("/admin/targets")) e.currentTarget.style.background = "transparent" }}
+          onMouseOver={(e) => { if (pathname !== "/admin/targets") e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
+          onMouseOut={(e) => { if (pathname !== "/admin/targets") e.currentTarget.style.background = "transparent" }}
         >
-          체납자 원장
+          체납자 통합 원장 (DB)
+        </Link>
+        <Link 
+          href="/admin/campaigns?upload=true"
+          onClick={(e) => handleMenuClick(e, "/admin/campaigns?upload=true")}
+          style={{ 
+            padding: "12px 16px", borderRadius: "8px", border: "1px solid #3b82f6", display: "block", transition: "all 0.2s", textDecoration: "none",
+            background: "rgba(59, 130, 246, 0.15)",
+            color: "#60a5fa", fontWeight: "bold"
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.background = "rgba(59, 130, 246, 0.25)" }}
+          onMouseOut={(e) => { e.currentTarget.style.background = "rgba(59, 130, 246, 0.15)" }}
+        >
+          📥 체납 엑셀 데이터 업로드
         </Link>
         <Link 
           href="/admin/workers"
@@ -86,13 +99,13 @@ export default function AdminSidebar({ onTestGuideSuccess }: { onTestGuideSucces
           onClick={(e) => handleMenuClick(e, "/admin/campaigns")}
           style={{ 
             padding: "12px 16px", borderRadius: "8px", border: "none", display: "block", transition: "background 0.2s", textDecoration: "none",
-            background: pathname.startsWith("/admin/campaigns") ? "rgba(255,255,255,0.1)" : "transparent",
-            color: pathname.startsWith("/admin/campaigns") ? "white" : "#cbd5e1"
+            background: pathname === "/admin/campaigns" ? "rgba(255,255,255,0.1)" : "transparent",
+            color: pathname === "/admin/campaigns" ? "white" : "#cbd5e1"
           }}
-          onMouseOver={(e) => { if (!pathname.startsWith("/admin/campaigns")) e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
-          onMouseOut={(e) => { if (!pathname.startsWith("/admin/campaigns")) e.currentTarget.style.background = "transparent" }}
+          onMouseOver={(e) => { if (pathname !== "/admin/campaigns") e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
+          onMouseOut={(e) => { if (pathname !== "/admin/campaigns") e.currentTarget.style.background = "transparent" }}
         >
-          방문 배정 관리
+          현장 방문 배정
         </Link>
         <Link 
           href="/admin/stats"

@@ -86,7 +86,6 @@ function FaqItem({ q, a, checkId }: { q: string; a: React.ReactNode; checkId: st
 }
 
 const SECTION_DATA = [
-  { id: 0, items: ["s0-1", "s0-2", "s0-3"] },
   { id: 1, items: ["s1-1", "s1-2", "s1-3"] },
   { id: 2, items: ["s2-1", "s2-2", "s2-3", "s2-4", "s2-5"] },
   { id: 3, items: ["s3-1", "s3-2"] },
@@ -95,7 +94,7 @@ const SECTION_DATA = [
 ];
 
 export default function GuidePage() {
-  const [openSection, setOpenSection] = useState<number | null>(0);
+  const [openSection, setOpenSection] = useState<number | null>(1);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [sectionStatus, setSectionStatus] = useState<Record<number, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -208,35 +207,8 @@ export default function GuidePage() {
         )}
       </div>
 
-      {/* ── 0장: 로그인 ── */}
-      <Section number={0} title="로그인 및 보안 접속" itemIds={SECTION_DATA[0].items}>
-        <div className="guide-info">
-          Field-Master는 <strong>보안형 폐쇄 업무 시스템</strong>입니다. 관리자가 발급한 계정으로만 접속할 수 있습니다.
-        </div>
-        <Step num={1} checkId="s0-1">
-          <p>
-            <strong>작업자 계정 발급 받기</strong><br/>
-            소속 기관의 관리자가 발급하여 전달합니다.<br/>
-            필요시 소속 기관의 관리자에게 본인의 전화번호를 등록해 달라고 요청하세요.
-          </p>
-        </Step>
-        <Step num={2} checkId="s0-2">
-          <p>
-            <strong>로그인 하기</strong><br/>
-            앱에 접속하여 본인의 <strong>전화번호</strong>와 관리자가 발급해 준 <strong>초기 비밀번호</strong>를 입력하여 로그인합니다.
-          </p>
-        </Step>
-        <Step num={3} checkId="s0-3">
-          <p>
-            <strong>보안 PIN 입력 (E2EE 암호해독)</strong><br/>
-            로그인 직후 <strong>[Workspace 보안 접속]</strong> 화면이 나옵니다.<br/>
-            관리자에게 전달받은 <strong>업무용 PIN 번호(숫자 6자리)</strong>를 입력해야만 현장 데이터가 복호화되어 화면에 나타납니다.
-          </p>
-        </Step>
-      </Section>
-
       {/* ── 1장: 설치 ── */}
-      <Section number={1} title="앱 설치하기 (처음 한 번만)" itemIds={SECTION_DATA[1].items}>
+      <Section number={1} title="앱 설치하기 (처음 한 번만)" itemIds={SECTION_DATA[0].items}>
         <div className="guide-info">
           Field-Master는 별도의 앱스토어 다운로드 없이, <strong>크롬(Chrome) 브라우저</strong>에서 바로 휴대폰 앱으로 설치하실 수 있습니다.
         </div>
@@ -263,7 +235,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── 2장: 실전 따라하기 ── */}
-      <Section number={2} title="실무자용: 현장 방문 A to Z" itemIds={SECTION_DATA[2].items}>
+      <Section number={2} title="실무자용: 현장 방문 A to Z" itemIds={SECTION_DATA[1].items}>
         <p style={{ fontSize: 16, lineHeight: 1.7, marginBottom: 16 }}>
           실태확인원이 앱을 어떻게 사용하는지 핵심 업무 흐름을 파악해 보세요.
         </p>
@@ -304,7 +276,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── 3장: 미정리 상담 내용 ── */}
-      <Section number={3} title="미정리 상담 보관함" itemIds={SECTION_DATA[3].items}>
+      <Section number={3} title="미정리 상담 보관함" itemIds={SECTION_DATA[2].items}>
         <Step num={1} checkId="s3-1">
           <p>
             <strong>미정리 상담 보관이란?</strong><br />
@@ -321,7 +293,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── 4장: 부가 기능 ── */}
-      <Section number={4} title="부가 기능 (재방문 예약 및 문자 발송)" itemIds={SECTION_DATA[4].items}>
+      <Section number={4} title="부가 기능 (재방문 예약 및 문자 발송)" itemIds={SECTION_DATA[3].items}>
         <Step num={1} checkId="s4-1">
           <p>
             <strong>📅 재방문 예약하기</strong><br />
@@ -337,7 +309,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── 5장: FAQ ── */}
-      <Section number={5} title="자주 묻는 질문 (FAQ)" itemIds={SECTION_DATA[5].items}>
+      <Section number={5} title="자주 묻는 질문 (FAQ)" itemIds={SECTION_DATA[4].items}>
         <FaqItem checkId="s5-1" q="Q. 앱에 접속했는데 아무 명단도 없어요." a={<p>관리자(공무원)가 아직 오늘의 업무를 선생님(실태확인원)에게 배정하지 않은 상태입니다. 관리자에게 배정을 요청해 주세요.</p>} />
         <FaqItem checkId="s5-2" q="Q. 클로바노트에서 &quot;공유&quot;를 눌러도 Field-Master가 안 보여요" a={<p>홈 화면에 앱이 설치되어 있어야 합니다. 크롬 메뉴(⋮)에서 &quot;홈 화면에 추가&quot;를 진행해 주세요. 아이폰(iOS)의 경우 별도의 단축어 세팅이 필요할 수 있습니다.</p>} />
         <FaqItem checkId="s5-3" q="Q. 데이터 유출 위험은 없나요?" a={<p>모든 데이터는 <strong>종단간 암호화(E2EE)</strong>로 강력하게 보호되며 <strong>이중 잠금(2-Factor) 체계</strong>가 적용되어 있습니다. 1차 로그인 비밀번호, 2차 PIN 번호가 모두 있어야 합니다. 기기 분실 시 관리자님이 즉시 계정을 원격 차단할 수 있습니다.</p>} />
@@ -347,7 +319,7 @@ export default function GuidePage() {
       <div style={{ padding: "30px 20px", background: "#fff", borderTop: "1px solid #ddd", marginTop: "40px", textAlign: "center" }}>
         <h3 style={{ fontSize: "18px", marginBottom: "16px", color: allCompleted ? "var(--color-primary)" : "#333" }}>가이드 숙지 확인</h3>
         <p style={{ fontSize: "14px", color: "#666", marginBottom: "20px" }}>
-          위의 6개 섹션(총 18개 항목)의 체크박스를 모두 확인해야 제출이 가능합니다.
+          위의 5개 섹션(총 15개 항목)의 체크박스를 모두 확인해야 제출이 가능합니다.
         </p>
         <button 
           onClick={handleSubmit}

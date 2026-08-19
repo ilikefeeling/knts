@@ -2,8 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
   let supabaseResponse = NextResponse.next({
-    request,
+    request: {
+      headers: requestHeaders,
+    },
   })
 
   const supabase = createServerClient(
@@ -17,7 +22,9 @@ export async function updateSession(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
-            request,
+            request: {
+              headers: requestHeaders,
+            },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -37,6 +44,7 @@ export async function updateSession(request: NextRequest) {
 
   // 보호할 라우트 설정
   const isProtectedRoute = !request.nextUrl.pathname.startsWith('/login') && 
+                           !request.nextUrl.pathname.startsWith('/admin/login') &&
                            !request.nextUrl.pathname.startsWith('/auth') && 
                            !request.nextUrl.pathname.startsWith('/api/auth') && 
                            !request.nextUrl.pathname.startsWith('/api/share-target') && 
@@ -45,6 +53,8 @@ export async function updateSession(request: NextRequest) {
                            !request.nextUrl.pathname.startsWith('/ios-guide') &&
                            !request.nextUrl.pathname.startsWith('/start') &&
                            !request.nextUrl.pathname.startsWith('/pricing') &&
+                           !request.nextUrl.pathname.startsWith('/sw.js') &&
+                           !request.nextUrl.pathname.startsWith('/manifest.json') &&
                            request.nextUrl.pathname !== '/'
 
   // Landing page is now public, so no redirect on root.
@@ -52,7 +62,7 @@ export async function updateSession(request: NextRequest) {
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     if (request.nextUrl.pathname.startsWith('/admin')) {
-      url.pathname = '/login/admin'
+      url.pathname = '/admin/login'
     } else {
       url.pathname = '/login'
     }

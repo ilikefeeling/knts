@@ -114,10 +114,20 @@ export async function getWorkerNotices(): Promise<{ notice: Notice, isRead: bool
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // 모든 공지사항 조회 (우선 단순화하여 모두 조회, 정책에 따라 필터링 됨)
+  // 현재 보조원의 admin_id를 조회
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("admin_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !profile.admin_id) return [];
+
+  // 소속 관리자가 작성한 공지사항만 필터링해서 조회
   const { data: notices, error: noticeError } = await supabase
     .from("notices")
     .select("*")
+    .eq("admin_id", profile.admin_id)
     .order("is_important", { ascending: false })
     .order("created_at", { ascending: false });
 

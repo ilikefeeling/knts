@@ -32,8 +32,9 @@ export default function SecurityCenter() {
   const [initPin, setInitPin] = useState("");
   const [initPinConfirm, setInitPinConfirm] = useState("");
 
-  // PIN 변경 모달 상태
   const [showResetModal, setShowResetModal] = useState(false);
+  const [isDemoPinMode, setIsDemoPinMode] = useState(false);
+  const [isForceReset, setIsForceReset] = useState(false);
   const [oldPin, setOldPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [newPinConfirm, setNewPinConfirm] = useState("");
@@ -146,13 +147,15 @@ export default function SecurityCenter() {
     setProgressPercent(0);
 
     try {
-      // 1. 기존 PIN 검증
-      const currentHash = await hashPin(oldPin);
-      const savedPin = sessionStorage.getItem("workspace_pin");
-      if (savedPin !== oldPin) {
-        alert("기존 PIN 번호가 올바르지 않습니다.");
-        setReencrypting(false);
-        return;
+      // 1. 기존 PIN 검증 (isForceReset인 경우 건너뜀)
+      if (!isForceReset) {
+        const currentHash = await hashPin(oldPin);
+        const dbHash = await getAdminPinHash();
+        if (dbHash && currentHash !== dbHash) {
+          alert("기존 PIN 번호가 올바르지 않습니다.\n기존 PIN이 생각나지 않으시면 '[기존 PIN을 잊어버림]' 체크박스를 선택해 주세요.");
+          setReencrypting(false);
+          return;
+        }
       }
 
       // 2. 마스터 원장 데이터 재암호화
@@ -330,10 +333,16 @@ export default function SecurityCenter() {
             </div>
 
             <button 
-              onClick={() => {
-                const isDemoMode = hasPin && logs.length === 0;
-                if (isDemoMode) setOldPin("159357");
-                else setOldPin("");
+              onClick={async () => {
+                const dbHash = await getAdminPinHash();
+                const demoHash = await hashPin("159357");
+                if (dbHash && dbHash === demoHash) {
+                  setOldPin("159357");
+                  setIsDemoPinMode(true);
+                } else {
+                  setOldPin("");
+                  setIsDemoPinMode(false);
+                }
                 setShowResetModal(true);
               }}
               style={{ padding: "12px 20px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}
@@ -457,24 +466,45 @@ export default function SecurityCenter() {
                   새로운 PIN으로 변경하면 시스템에 저장된 <strong>모든 암호화 데이터가 재암호화</strong>됩니다. 체납자 수에 따라 수 분 이상 소요될 수 있습니다.
                 </div>
 
-                {hasPin && logs.length === 0 ? (
+                {isDemoPinMode ? (
                   <div style={{ marginBottom: "16px", background: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ fontSize: "14px", fontWeight: "bold", color: "#334155", marginBottom: "8px" }}>✅ 데모 임시 PIN 자동 적용됨</div>
+                    <div style={{ fontSize: "14px", fontWeight: "bold", color: "#334155", marginBottom: "8px" }}>✅ 데모 임시 PIN(159357) 자동 적용됨</div>
                     <div style={{ color: "#64748b", fontSize: "13px", lineHeight: "1.5" }}>
-                      1초 체험하기를 위해 발급된 <strong>임시 PIN(1****7)</strong>이 기존 PIN으로 자동 입력되어 있습니다.<br/>
+                      1초 체험하기를 위해 발급된 <strong>임시 PIN(159357)</strong>이 기존 PIN으로 자동 입력되어 있습니다.<br/>
                       아래에 원하시는 <strong>나만의 새로운 PIN</strong>을 입력하여 나만의 보안 환경을 설정해 보세요!
                     </div>
                   </div>
                 ) : (
                   <div style={{ marginBottom: "16px" }}>
-                    <label style={{ display: "block", fontSize: "14px", fontWeight: "bold", color: "#334155", marginBottom: "8px" }}>기존 마스터 PIN (현재)</label>
-                    <input 
-                      type="text"
-                      maxLength={6}
-                      value={oldPin}
-                      onChange={(e) => setOldPin(e.target.value)}
-                      style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "18px", letterSpacing: "4px", textAlign: "center", fontWeight: "bold" }}
-                    />
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <label style={{ fontSize: "14px", fontWeight: "bold", color: "#334155" }}>기존 마스터 PIN (현재)</label>
+                      <label style={{ fontSize: "12px", color: "#d97706", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <input 
+                          type="checkbox"
+                          checked={isForceReset}
+                          onChange={(e) => {
+                            setIsForceReset(e.target.checked);
+                            if (e.target.checked) setOldPin("");
+                          }}
+                        />
+                        🔓 PIN 번호 잊음 (강제 초기화)
+                      </label>
+                    </div>
+
+                    {!isForceReset ? (
+                      <input 
+                        type="text"
+                        maxLength={6}
+                        value={oldPin}
+                        placeholder="현재 마스터 PIN 6자리 입력"
+                        onChange={(e) => setOldPin(e.target.value)}
+                        style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "18px", letterSpacing: "4px", textAlign: "center", fontWeight: "bold" }}
+                      />
+                    ) : (
+                      <div style={{ padding: "10px", background: "#fffbeb", border: "1px dashed #f59e0b", borderRadius: "8px", fontSize: "13px", color: "#b45309" }}>
+                        ⚠️ 기존 PIN 검증을 건너뛰고 새로운 PIN으로 마스터 암호를 <strong>강제 초기화</strong>합니다.
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -484,6 +514,7 @@ export default function SecurityCenter() {
                     type="text"
                     maxLength={6}
                     value={newPin}
+                    placeholder="새 6자리 PIN 입력"
                     onChange={(e) => setNewPin(e.target.value)}
                     style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "18px", letterSpacing: "4px", textAlign: "center", fontWeight: "bold" }}
                   />
@@ -495,6 +526,7 @@ export default function SecurityCenter() {
                     type="text"
                     maxLength={6}
                     value={newPinConfirm}
+                    placeholder="새 6자리 PIN 다시 입력"
                     onChange={(e) => setNewPinConfirm(e.target.value)}
                     style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "18px", letterSpacing: "4px", textAlign: "center", fontWeight: "bold" }}
                   />
@@ -504,6 +536,7 @@ export default function SecurityCenter() {
                   <button 
                     onClick={() => {
                       setShowResetModal(false);
+                      setIsForceReset(false);
                       setOldPin("");
                       setNewPin("");
                       setNewPinConfirm("");
@@ -514,10 +547,10 @@ export default function SecurityCenter() {
                   </button>
                   <button 
                     onClick={startReencryption}
-                    disabled={!oldPin || !newPin || !newPinConfirm}
-                    style={{ flex: 1, padding: "12px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", opacity: (!oldPin || !newPin || !newPinConfirm) ? 0.5 : 1 }}
+                    disabled={(!isForceReset && !oldPin) || !newPin || !newPinConfirm}
+                    style={{ flex: 1, padding: "12px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", opacity: ((!isForceReset && !oldPin) || !newPin || !newPinConfirm) ? 0.5 : 1 }}
                   >
-                    재암호화 시작
+                    {isForceReset ? "강제 초기화 시작" : "재암호화 시작"}
                   </button>
                 </div>
               </>

@@ -26,6 +26,20 @@ body {
   font-size: 20px;
   line-height: 1.7;
   -webkit-text-size-adjust: 100%;
+  word-break: keep-all;
+  
+  /* Force center the app container on desktop screens */
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Ensure admin wrapper takes full width inside flex body */
+.admin-wrapper {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
 }
 
 a {
@@ -33,11 +47,15 @@ a {
 }
 
 .app-container {
+  width: 100%;
   max-width: 480px;
-  margin: 0 auto;
+  margin: 0 auto !important;
   padding: 3.5rem 1rem 4rem;
   min-height: 100vh;
   background: var(--color-bg);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.08); /* 데스크탑에서 모바일 뷰 구분감 추가 */
+  position: relative;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -1303,4 +1321,193 @@ button.btn-cancel {
     display: flex !important;
     flex-direction: row !important;
   }
+}
+
+/* ===== 관리자 대시보드 강화 스타일 ===== */
+
+/* Fade-in-up 등장 애니메이션 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.dash-fade-in {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+.dash-fade-in:nth-child(1) { animation-delay: 0.05s; }
+.dash-fade-in:nth-child(2) { animation-delay: 0.1s; }
+.dash-fade-in:nth-child(3) { animation-delay: 0.15s; }
+.dash-fade-in:nth-child(4) { animation-delay: 0.2s; }
+.dash-fade-in:nth-child(5) { animation-delay: 0.25s; }
+.dash-fade-in:nth-child(6) { animation-delay: 0.3s; }
+
+/* 글래스모피즘 카드 */
+.glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+/* KPI 카드 변동 지표 */
+.kpi-delta-up {
+  color: #10b981;
+  font-size: 13px;
+  font-weight: 600;
+}
+.kpi-delta-down {
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+}
+.kpi-delta-neutral {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* CSS-only 도넛 차트 */
+.donut-chart {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.donut-chart .donut-center {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  background: #1e293b;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* 프로그레스 바 */
+.progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(51, 65, 85, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+}
+
+/* 타임라인 */
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  transition: background 0.15s ease;
+}
+.timeline-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+.timeline-item:last-child {
+  border-bottom: none;
+}
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+/* 빠른 액션 카드 */
+.quick-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 16px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: rgba(30, 41, 59, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+.quick-action-card:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+  color: #60a5fa;
+  transform: translateY(-2px);
+}
+.quick-action-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+/* 새로고침 스피너 */
+.refresh-spin {
+  animation: spin-slow 1s linear infinite;
+  display: inline-block;
+}
+
+/* 시스템 상태 인디케이터 */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-dot.online {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+.status-dot.warning {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+}
+.status-dot.offline {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
 }

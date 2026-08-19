@@ -14,11 +14,17 @@ export default function AutoLogout() {
   const performLogout = async () => {
     try {
       sessionStorage.clear();
-      await fetch("/api/auth/signout", { method: "POST" });
-      alert("보안 및 데이터 절약을 위해 장시간 활동이 없어 자동으로 로그아웃 되었습니다.");
-      router.push("/login?timeout=1");
+      await fetch("/api/auth/signout", { 
+        method: "POST",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
     } catch (e) {
       console.error("Auto logout failed", e);
+    } finally {
+      alert("보안 및 데이터 절약을 위해 장시간 활동이 없어 자동으로 로그아웃 되었습니다.");
+      router.push("/login?timeout=1");
     }
   };
 

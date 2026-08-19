@@ -13,7 +13,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   if (isAdminPath || isLoginPath || isHomePath) {
     // 관리자 페이지, 로그인 페이지, 랜딩 페이지는 네비바(상단 바) 없이 전체 너비 사용
     return (
-      <div className={isAdminPath ? "admin-wrapper" : ""} style={{ minHeight: "100vh", background: "var(--color-bg)" }}>
+      <div className="admin-wrapper" style={{ minHeight: "100vh", background: "var(--color-bg)" }}>
         {children}
       </div>
     );

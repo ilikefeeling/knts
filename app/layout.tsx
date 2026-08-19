@@ -35,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>
+      <body suppressHydrationWarning>
         <InAppBrowserGuard />
         <RegisterSW />
         <AutoLogout />

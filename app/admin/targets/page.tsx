@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { getMasterLedgers, setMasterLedgerIntensive, MasterLedger, uploadMasterLedgers } from "@/lib/adminDb";
+import React, { useState, useEffect, useMemo } from "react";
+import { getMasterLedgers, setMasterLedgerIntensive, MasterLedger } from "@/lib/adminDb";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
-import * as XLSX from "xlsx";
+import ExcelUploader from "@/components/ExcelUploader";
 
 export default function TargetsPage() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function TargetsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showUploadWizard, setShowUploadWizard] = useState(false);
 
   useEffect(() => {
     const savedPin = sessionStorage.getItem("workspace_pin");
@@ -81,7 +81,7 @@ export default function TargetsPage() {
                 style={{ flex: 1, padding: "10px 16px", borderRadius: "8px", border: "1px solid #334155", background: "#0f172a", color: "white", fontSize: "16px" }}
               />
             </div>
-            <div>
+            <div style={{ display: "flex", gap: "12px" }}>
               <button 
                 onClick={handleIntensive}
                 style={{ padding: "10px 16px", borderRadius: "8px", background: "#ef4444", color: "white", border: "none", cursor: "pointer", fontWeight: "bold" }}
@@ -98,39 +98,54 @@ export default function TargetsPage() {
                   <th style={{ padding: "12px", textAlign: "left", width: "40px" }}>
                     <input 
                       type="checkbox" 
-                      onChange={e => setSelectedIds(e.target.checked ? filteredLedgers.map(l => l.id) : [])}
-                      checked={selectedIds.length === filteredLedgers.length && filteredLedgers.length > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedIds(filteredLedgers.map(l => l.id));
+                        else setSelectedIds([]);
+                      }}
+                      checked={selectedIds.length > 0 && selectedIds.length === filteredLedgers.length}
                     />
                   </th>
-                  <th style={{ padding: "12px", textAlign: "left" }}>이름</th>
+                  <th style={{ padding: "12px", textAlign: "left" }}>관리번호</th>
+                  <th style={{ padding: "12px", textAlign: "left" }}>성명/법인명</th>
                   <th style={{ padding: "12px", textAlign: "left" }}>연락처</th>
                   <th style={{ padding: "12px", textAlign: "left" }}>주소</th>
-                  <th style={{ padding: "12px", textAlign: "left" }}>상태</th>
-                  <th style={{ padding: "12px", textAlign: "left" }}>최초 등록일</th>
+                  <th style={{ padding: "12px", textAlign: "right" }}>총체납액</th>
+                  <th style={{ padding: "12px", textAlign: "center" }}>관리상태</th>
+                  <th style={{ padding: "12px", textAlign: "left" }}>등록일</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={6} style={{ textAlign: "center", padding: "32px", color: "#94a3b8" }}>로딩 중...</td></tr>
+                  <tr>
+                    <td colSpan={8} style={{ padding: "24px", textAlign: "center", color: "#94a3b8" }}>로딩 중...</td>
+                  </tr>
                 ) : filteredLedgers.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: "center", padding: "32px", color: "#94a3b8" }}>검색된 체납자가 없습니다.</td></tr>
+                  <tr>
+                    <td colSpan={8} style={{ padding: "24px", textAlign: "center", color: "#94a3b8" }}>등록된 체납자 원장이 없습니다. 상단 [📥 엑셀 명단 대량 등록] 버튼으로 체납자 엑셀을 등록하세요.</td>
+                  </tr>
                 ) : (
                   filteredLedgers.map(ledger => (
-                    <tr key={ledger.id} style={{ borderBottom: "1px solid #334155", background: selectedIds.includes(ledger.id) ? "rgba(239, 68, 68, 0.1)" : "transparent" }}>
+                    <tr key={ledger.id} style={{ borderBottom: "1px solid #334155" }}>
                       <td style={{ padding: "12px" }}>
                         <input 
                           type="checkbox" 
                           checked={selectedIds.includes(ledger.id)}
-                          onChange={e => {
-                            if (e.target.checked) setSelectedIds(prev => [...prev, ledger.id]);
-                            else setSelectedIds(prev => prev.filter(id => id !== ledger.id));
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedIds([...selectedIds, ledger.id]);
+                            else setSelectedIds(selectedIds.filter(id => id !== ledger.id));
                           }}
                         />
                       </td>
+                      <td style={{ padding: "12px", fontWeight: "500" }}>{ledger.management_number || "-"}</td>
                       <td style={{ padding: "12px", fontWeight: "bold" }}>{ledger.name}</td>
-                      <td style={{ padding: "12px", color: "#cbd5e1" }}>{ledger.phone}</td>
-                      <td style={{ padding: "12px", color: "#cbd5e1", fontSize: "14px" }}>{ledger.address} {ledger.detail_address}</td>
-                      <td style={{ padding: "12px" }}>
+                      <td style={{ padding: "12px", color: "#cbd5e1" }}>{ledger.phone || "-"}</td>
+                      <td style={{ padding: "12px", color: "#cbd5e1", maxWidth: "250px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {ledger.address} {ledger.detail_address}
+                      </td>
+                      <td style={{ padding: "12px", textAlign: "right", color: "#f87171", fontWeight: "bold" }}>
+                        {Number(ledger.arrears_amount || 0).toLocaleString()}원
+                      </td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>
                         {ledger.is_intensive ? (
                           <span style={{ padding: "4px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "bold", background: "rgba(239, 68, 68, 0.2)", color: "#ef4444" }}>🚨 집중관리대상</span>
                         ) : (
@@ -146,6 +161,30 @@ export default function TargetsPage() {
           </div>
         </div>
       </div>
+
+      {/* 엑셀 업로드 모달 */}
+      {showUploadWizard && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "#1e293b", padding: "32px", borderRadius: "16px", maxWidth: "600px", width: "100%", border: "1px solid #334155" }}>
+            <h2 style={{ color: "white", margin: "0 0 16px 0" }}>체납자 원장 엑셀 명단 대량 등록</h2>
+            <p style={{ color: "#cbd5e1", marginBottom: "24px" }}>
+              실제 체납자 엑셀 파일(.xlsx)을 업로드하면 <strong>자동 중복 검사(Deduplication) 및 암호화</strong>를 통해 체납자 원장 DB에 등록됩니다.
+            </p>
+            <ExcelUploader 
+              onComplete={() => {
+                setShowUploadWizard(false);
+                loadData();
+              }} 
+            />
+            <button 
+              onClick={() => setShowUploadWizard(false)} 
+              style={{ marginTop: "16px", padding: "10px 16px", width: "100%", borderRadius: "8px", background: "transparent", color: "#cbd5e1", border: "1px solid #334155", cursor: "pointer" }}
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
