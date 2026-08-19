@@ -137,34 +137,6 @@ export default function WorkerLoginPage() {
           </button>
         </form>
 
-        {/* 테스트 계정 안내 및 원클릭 체험 버튼 */}
-        <div style={{ marginTop: "20px", padding: "12px", background: "#f8fafc", borderRadius: "10px", border: "1px dashed #cbd5e1", textAlign: "center" }}>
-          <p style={{ fontSize: "12px", color: "#64748b", fontWeight: "bold", margin: "0 0 8px 0" }}>
-            🧪 테스트용 실태확인원 계정
-          </p>
-          <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-            <button
-              type="button"
-              onClick={() => {
-                setPhone("010-1111-2222");
-                setPassword("2222");
-              }}
-              style={{ padding: "6px 12px", fontSize: "12px", background: "#ffffff", border: "1px solid #94a3b8", borderRadius: "6px", cursor: "pointer", color: "#1e293b", fontWeight: "500" }}
-            >
-              보조원 A (010-1111-2222 / 2222)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPhone("010-3333-4444");
-                setPassword("3333");
-              }}
-              style={{ padding: "6px 12px", fontSize: "12px", background: "#ffffff", border: "1px solid #94a3b8", borderRadius: "6px", cursor: "pointer", color: "#1e293b", fontWeight: "500" }}
-            >
-              보조원 B (010-3333-4444 / 3333)
-            </button>
-          </div>
-        </div>
 
         <div style={{ marginTop: "20px", textAlign: "center", borderTop: "1px solid #e2e8f0", paddingTop: "14px" }}>
           <Link href="/" style={{ color: "#64748b", fontSize: "13px", textDecoration: "none" }}>
