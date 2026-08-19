@@ -24,6 +24,7 @@ export type MasterLedger = {
   address: string;
   detail_address: string;
   is_intensive?: boolean;
+  arrears_amount?: number;
   created_at: string;
 };
 
