@@ -7,12 +7,28 @@ import InAppBrowserGuard from "@/components/InAppBrowserGuard";
 import AutoLogout from "@/components/AutoLogout";
 
 export const metadata: Metadata = {
-  title: "FM(Field-Master)",
-  description: "B2G / 공공기관 현장조사 전용 솔루션",
+  title: "국세청 현장 확인원",
+  description: "국세청 현장조사 및 실태확인 시스템",
   manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon-192.png",
     apple: "/icons/icon-192.png",
+  },
+  openGraph: {
+    title: "국세청 현장 확인원",
+    description: "국세청 현장조사 및 실태확인 시스템",
+    url: "https://www.kmaster.xyz",
+    siteName: "국세청 현장 확인원",
+    images: [
+      {
+        url: "/opengraph-image.png?v=2",
+        width: 1200,
+        height: 630,
+        alt: "국세청 실태확인원 OG Image",
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
   },
   formatDetection: {
     telephone: false,
