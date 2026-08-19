@@ -34,9 +34,8 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#f8fafc", fontFamily: "'Pretendard', sans-serif" }}>
       {/* Header - Minimal */}
-      <header style={{ padding: "30px 20px 10px", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", background: "transparent", gap: "12px" }}>
-        <img src="/nts-logo.png" alt="국세청" style={{ height: "48px", objectFit: "contain" }} />
-        <div style={{ fontSize: "16px", fontWeight: "700", color: "#94a3b8", letterSpacing: "1px" }}>FIELD-MASTER</div>
+      <header style={{ padding: "20px", display: "flex", justifyContent: "center", alignItems: "center", background: "transparent" }}>
+        <div style={{ fontSize: "20px", fontWeight: "900", color: "#64748b", letterSpacing: "-1px" }}>Field-Master</div>
       </header>
 
       {/* Main Content - Centered Card */}
@@ -69,7 +68,19 @@ export default function LandingPage() {
             e.currentTarget.style.boxShadow = "0 20px 40px rgba(59, 130, 246, 0.3)";
           }}
         >
-          <div style={{ fontSize: "72px", lineHeight: "1" }}>📱</div>
+          <div style={{ 
+            width: "88px", 
+            height: "88px", 
+            backgroundColor: "white", 
+            borderRadius: "22px", 
+            display: "flex", 
+            justifyContent: "center", 
+            alignItems: "center",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+            padding: "12px"
+          }}>
+            <img src="/nts-logo.png" alt="국세청" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontSize: "32px", fontWeight: "900", margin: "0 0 12px 0", letterSpacing: "-1px" }}>
               실태확인원
