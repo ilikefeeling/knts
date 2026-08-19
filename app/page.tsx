@@ -34,8 +34,24 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#f8fafc", fontFamily: "'Pretendard', sans-serif" }}>
       {/* Header - Minimal */}
-      <header style={{ padding: "20px", display: "flex", justifyContent: "center", alignItems: "center", background: "transparent" }}>
-        <div style={{ fontSize: "20px", fontWeight: "900", color: "#64748b", letterSpacing: "-1px" }}>Field-Master</div>
+      <header style={{ padding: "20px 24px", display: "flex", justifyContent: "flex-start", alignItems: "center", background: "transparent", width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ 
+            width: "36px", 
+            height: "36px", 
+            borderRadius: "10px", 
+            background: "linear-gradient(135deg, #1e3a8a, #2563eb)", 
+            color: "white", 
+            display: "flex", 
+            justifyContent: "center", 
+            alignItems: "center", 
+            fontWeight: "900", 
+            fontSize: "18px" 
+          }}>
+            NTS
+          </div>
+          <div style={{ fontSize: "22px", fontWeight: "900", color: "#1e293b", letterSpacing: "-1px" }}>국세청</div>
+        </div>
       </header>
 
       {/* Main Content - Centered Card */}
@@ -46,10 +62,9 @@ export default function LandingPage() {
             background: "linear-gradient(135deg, #2563eb, #3b82f6)",
             border: "none",
             borderRadius: "32px",
-            padding: "40px",
+            padding: "32px",
             width: "100%",
             maxWidth: "360px",
-            aspectRatio: "1 / 1",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -69,25 +84,36 @@ export default function LandingPage() {
           }}
         >
           <div style={{ 
-            width: "88px", 
-            height: "88px", 
+            width: "100%", 
+            height: "180px", 
             backgroundColor: "white", 
-            borderRadius: "22px", 
+            borderRadius: "20px", 
             display: "flex", 
             justifyContent: "center", 
             alignItems: "center",
             boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-            padding: "12px"
+            padding: "20px"
           }}>
-            <img src="/nts-logo.png" alt="국세청" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            <img src="/nts-logo-real.jpg" alt="국세청 로고" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
-          <div style={{ textAlign: "center" }}>
-            <h2 style={{ fontSize: "32px", fontWeight: "900", margin: "0 0 12px 0", letterSpacing: "-1px" }}>
+          <div style={{ textAlign: "center", width: "100%" }}>
+            <h2 style={{ fontSize: "32px", fontWeight: "900", margin: "0 0 16px 0", letterSpacing: "-1px" }}>
               실태확인원
             </h2>
-            <p style={{ fontSize: "18px", opacity: 0.9, margin: 0, fontWeight: "500", backgroundColor: "rgba(255,255,255,0.2)", padding: "8px 20px", borderRadius: "999px" }}>
-              업무 시작하기 &rarr;
-            </p>
+            <div style={{ 
+              fontSize: "18px", 
+              opacity: 0.95, 
+              fontWeight: "600", 
+              backgroundColor: "rgba(255,255,255,0.25)", 
+              padding: "14px 20px", 
+              borderRadius: "16px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "8px"
+            }}>
+              업무 시작하기 <span style={{ fontSize: "20px" }}>&rarr;</span>
+            </div>
           </div>
         </button>
       </main>

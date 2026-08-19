@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <g transform="translate(150, 120)">
+    <path d="M-60,0 A60,60 0 1,0 60,0 A30,30 0 0,1 0,0 A30,30 0 0,0 -60,0" fill="#003f7a" />
+    <path d="M-60,0 A60,60 0 0,1 60,0 A30,30 0 0,1 0,0 A30,30 0 0,0 -60,0" fill="#d92139" />
+  </g>
+  <text x="150" y="230" font-family="'Pretendard', 'Malgun Gothic', sans-serif" font-size="44" font-weight="900" fill="#333" text-anchor="middle" letter-spacing="-2px">국세청</text>
+</svg>
