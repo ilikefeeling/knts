@@ -59,3 +59,16 @@ USING (
     AND task_ledger.assigned_worker_id = auth.uid()
   )
 );
+
+-- 권한 부여 (Supabase 10월 30일 정책 변경 대응)
+GRANT SELECT ON public.campaigns TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.campaigns TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.campaigns TO service_role;
+
+GRANT SELECT ON public.master_ledger TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.master_ledger TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.master_ledger TO service_role;
+
+GRANT SELECT ON public.task_ledger TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.task_ledger TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.task_ledger TO service_role;

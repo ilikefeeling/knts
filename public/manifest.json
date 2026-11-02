@@ -1,7 +1,7 @@
 {
-  "name": "FM(Field-Master)",
-  "short_name": "FM(Field-Master)",
-  "description": "B2G / 공공기관 현장조사 전용 솔루션",
+  "name": "Field-Master",
+  "short_name": "Field-Master",
+  "description": "스마트 현장조사 및 실태관리 솔루션",
   "id": "/",
   "start_url": "/start",
   "scope": "/",

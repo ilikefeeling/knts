@@ -148,3 +148,28 @@ ON CONFLICT (id) DO NOTHING;
 
 CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'photos');
 CREATE POLICY "Authenticated users can upload photos" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'photos' AND auth.role() = 'authenticated');
+
+-- 권한 부여 (Supabase 10월 30일 정책 변경 대응)
+GRANT SELECT ON public.profiles TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO service_role;
+
+GRANT SELECT ON public.target_ledger TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.target_ledger TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.target_ledger TO service_role;
+
+GRANT SELECT ON public.visit_records TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.visit_records TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.visit_records TO service_role;
+
+GRANT SELECT ON public.notices TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notices TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notices TO service_role;
+
+GRANT SELECT ON public.notice_reads TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notice_reads TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notice_reads TO service_role;
+
+GRANT SELECT ON public.shared_texts TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.shared_texts TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.shared_texts TO service_role;

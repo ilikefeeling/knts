@@ -48,9 +48,9 @@ export default function LandingPage() {
             fontWeight: "900", 
             fontSize: "18px" 
           }}>
-            NTS
+            FM
           </div>
-          <div style={{ fontSize: "22px", fontWeight: "900", color: "#1e293b", letterSpacing: "-1px" }}>국세청</div>
+          <div style={{ fontSize: "22px", fontWeight: "900", color: "#1e293b", letterSpacing: "-1px" }}>Field-Master</div>
         </div>
       </header>
 
@@ -89,16 +89,18 @@ export default function LandingPage() {
             backgroundColor: "white", 
             borderRadius: "20px", 
             display: "flex", 
+            flexDirection: "column",
             justifyContent: "center", 
             alignItems: "center",
             boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-            padding: "20px"
+            padding: "20px",
+            gap: "10px"
           }}>
-            <img src="/nts-logo-real.jpg" alt="국세청 로고" style={{ width: "100%", height: "100%", objectFit: "contain", transform: "scale(1.2)" }} />
+            <img src="/fm-logo.svg" alt="Field-Master 로고" style={{ maxWidth: "240px", width: "100%", height: "auto" }} />
           </div>
           <div style={{ textAlign: "center", width: "100%" }}>
-            <h2 style={{ fontSize: "32px", fontWeight: "900", margin: "0 0 16px 0", letterSpacing: "-1px" }}>
-              실태확인원
+            <h2 style={{ fontSize: "30px", fontWeight: "900", margin: "0 0 16px 0", letterSpacing: "-1px" }}>
+              현장 실태확인
             </h2>
             <div style={{ 
               fontSize: "18px", 
@@ -118,9 +120,9 @@ export default function LandingPage() {
         </button>
       </main>
 
-      {/* Footer - Admin links */}
-      <footer style={{ padding: "40px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", background: "transparent" }}>
-        <div style={{ display: "flex", gap: "24px", fontSize: "14px", color: "#cbd5e1" }}>
+      {/* Footer - Admin links & Legal Disclaimer */}
+      <footer style={{ padding: "30px 20px 40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", background: "transparent" }}>
+        <div style={{ display: "flex", gap: "24px", fontSize: "14px", color: "#94a3b8" }}>
           <button 
             onClick={() => router.push("/admin/login")}
             style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", padding: 0 }}
@@ -136,8 +138,11 @@ export default function LandingPage() {
             {isLoading ? "준비 중..." : "시스템 체험"}
           </button>
         </div>
-        <div style={{ color: "#e2e8f0", fontSize: "12px" }}>
-          © {new Date().getFullYear()} Field-Master.
+        <div style={{ color: "#94a3b8", fontSize: "11px", textAlign: "center", maxWidth: "420px", lineHeight: "1.5", wordBreak: "keep-all" }}>
+          ※ 본 시스템은 현장조사 및 실태관리 업무를 지원하는 민간 B2B 솔루션이며, 대한민국 정부 또는 국세청의 공식 서비스가 아닙니다.
+        </div>
+        <div style={{ color: "#cbd5e1", fontSize: "12px" }}>
+          © {new Date().getFullYear()} Field-Master. All rights reserved.
         </div>
       </footer>
     </div>

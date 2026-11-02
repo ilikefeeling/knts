@@ -144,6 +144,9 @@ export default function WorkerLoginPage() {
           </Link>
         </div>
       </div>
+      <p style={{ marginTop: "16px", color: "#94a3b8", fontSize: "11px", textAlign: "center", maxWidth: "380px", lineHeight: "1.4" }}>
+        ※ 본 시스템은 현장조사 업무 지원을 위한 민간 B2B 솔루션이며, 대한민국 정부 또는 국세청의 공식 서비스가 아닙니다.
+      </p>
     </div>
   );
 }

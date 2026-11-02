@@ -15,3 +15,8 @@ ALTER TABLE public.pin_audit_logs ENABLE ROW LEVEL SECURITY;
 -- 관리자만 볼 수 있도록 간단한 정책 (필요시 수정)
 CREATE POLICY "Enable read for all authenticated users" ON public.pin_audit_logs FOR SELECT USING (true);
 CREATE POLICY "Enable all for service roles" ON public.pin_audit_logs USING (true);
+
+-- 권한 부여 (Supabase 10월 30일 정책 변경 대응)
+GRANT SELECT ON public.pin_audit_logs TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.pin_audit_logs TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.pin_audit_logs TO service_role;

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#1e3a8a" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Icon Emblem -->
+  <g filter="url(#shadow)">
+    <rect x="8" y="10" width="60" height="60" rx="16" fill="url(#bgGrad)" />
+    
+    <!-- Clipboard / Document -->
+    <path d="M31 24 H27 A3 3 0 0 0 24 27 V49 A3 3 0 0 0 27 52 H49 A3 3 0 0 0 52 49 V27 A3 3 0 0 0 49 24 H45" 
+          fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="31" y="21" width="14" height="6" rx="2" fill="#38bdf8" />
+    
+    <!-- Checkmark -->
+    <path d="M30 38 L36 44 L47 33" 
+          fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Typography -->
+  <text x="82" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-size="24" font-weight="900" fill="#0f172a" letter-spacing="-0.5px">Field-Master</text>
+  <text x="83" y="59" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-size="11" font-weight="700" fill="#64748b" letter-spacing="1.5px">FIELD WORK SOLUTION</text>
+</svg>

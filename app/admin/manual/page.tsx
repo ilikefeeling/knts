@@ -101,7 +101,7 @@ export default function ManualPage() {
               <li style={{ background: "#0f172a", padding: "16px", borderRadius: "8px" }}>
                 <strong style={{ color: "white", display: "block", marginBottom: "8px" }}>결과 추출 및 보고</strong>
                 <span style={{ color: "#94a3b8", display: "block", marginBottom: "4px" }}>- <strong>메뉴:</strong> [방문 완료 보고서]</span>
-                <span style={{ color: "#94a3b8", display: "block" }}>- <strong>사용법:</strong> 현장 방문이 완료된 건들을 날짜/담당자별로 조회 ➔ 우측 상단의 [엑셀 다운로드] 버튼 클릭 ➔ 상위 기관(국세청 등) 제출용 파일 획득</span>
+                <span style={{ color: "#94a3b8", display: "block" }}>- <strong>사용법:</strong> 현장 방문이 완료된 건들을 날짜/담당자별로 조회 ➔ 우측 상단의 [엑셀 다운로드] 버튼 클릭 ➔ 상위 관리 기관 및 발주처 제출용 파일 획득</span>
               </li>
             </ul>
           </div>

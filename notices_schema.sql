@@ -41,3 +41,12 @@ CREATE POLICY "Workers can insert their own reads" ON notice_reads FOR INSERT WI
 CREATE POLICY "Admins can view reads for their notices" ON notice_reads FOR SELECT USING (
   EXISTS (SELECT 1 FROM notices WHERE notices.id = notice_reads.notice_id AND notices.admin_id = auth.uid())
 );
+
+-- 권한 부여 (Supabase 10월 30일 정책 변경 대응)
+GRANT SELECT ON public.notices TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notices TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notices TO service_role;
+
+GRANT SELECT ON public.notice_reads TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notice_reads TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notice_reads TO service_role;

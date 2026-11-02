@@ -19,3 +19,8 @@ CREATE POLICY "Admins can view their own assignment logs" ON assignment_logs
 
 CREATE POLICY "Admins can insert assignment logs" ON assignment_logs
     FOR INSERT WITH CHECK (auth.uid() = admin_id);
+
+-- 권한 부여 (Supabase 10월 30일 정책 변경 대응)
+GRANT SELECT ON public.assignment_logs TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.assignment_logs TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.assignment_logs TO service_role;
